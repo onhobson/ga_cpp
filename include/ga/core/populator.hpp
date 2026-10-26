@@ -15,7 +15,12 @@
 
 namespace ga::detail
 {
-    
+
+/**
+ * @brief A class that creates a population of sequences and generates new sequences based on crossover and mutation operations.
+ * 
+ * @tparam Sequence The type that is used by the given crossover and mutation operators.
+ */
 template <typename Sequence>
 class Populator
 {
@@ -30,6 +35,9 @@ public:
         , m_config { config }
     { }
 
+    /**
+     * @brief Creates a randomized population of sequences based on the given base sequence.
+     */
     std::vector<Sequence> createRandomizedPopulation(const Sequence& baseSequence, Random& rng) const
     {
         std::vector<Sequence> population {};
@@ -54,7 +62,12 @@ public:
         return population;
     }
 
-
+    /**
+     * @brief Creates a new sequence based on the given two parent sequences, using crossover and mutation operations.
+     * 
+     * Randomly selects either a crossover or mutation operation based on the crossover rate specified in the `ga::Config` object.
+     * Forwards either the two parent sequences for crossover, or the first parent sequence for mutation, to the selected operation.
+     */
     Sequence createSequence(const Sequence& seq1, const Sequence& seq2, Random& rng) const
     {
         Sequence newSequence;
@@ -75,7 +88,7 @@ private:
     const Crossover<Sequence> m_crossover;
     const Mutate<Sequence> m_mutate;
 
-    const Config& m_config;
+    const Config& m_config; ///< References the `ga::Config` object owned by the `ga::GeneticAlgorithm` object that created this `Populator`.
 };
 
 }

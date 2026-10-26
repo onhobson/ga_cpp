@@ -7,6 +7,10 @@
 
 namespace ga::functions::Crossover
 {
+    /**
+     * Performs a single-point crossover between two sequences, producing a new sequence that combines elements from both parents.
+     * Not compatible with permutation sequences, as it may produce duplicates or missing elements.
+     */
     template <typename Sequence>
     Sequence singlePoint(const Sequence& seq1, const Sequence& seq2, Random& rng)
     {

@@ -9,7 +9,12 @@
 
 namespace ga
 {
-    
+
+/**
+ * @brief A struct that bundles the crossover and mutation operators for the genetic algorithm.
+ * 
+ * @tparam Sequence The type that is used by the given crossover and mutation operators.
+ */
 template <typename Sequence>
 struct Operators
 {

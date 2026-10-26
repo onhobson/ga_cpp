@@ -9,6 +9,24 @@
 namespace ga
 {
 
+/**
+ * @brief A class that holds the configuration parameters for the genetic algorithm.
+ * 
+ *  Configuration Parameters 
+ * @anchor `ga::Config::generationCount`
+ *  - The number of generations to run.
+ * 
+ * @anchor `ga::Config::populationSize`
+ *  - The number of individuals in each generation.
+ * 
+ * @anchor `ga::Config::eliteCount`
+ *  - The number of elite individuals to carry over to the next generation.
+ * 
+ * @anchor `ga::Config::crossoverRate`
+ *  - The probability of crossover occurring between two parent sequences.
+ * 
+ * @throws `std::invalid_argument` If any of the configuration parameters are invalid.
+ */
 class Config
 {
 public:
@@ -27,6 +45,10 @@ public:
     }
 
     std::size_t generationCount() const { return m_generationCount; }
+    /**
+     * @brief Sets the number of generations to run.
+     * @throws `std::invalid_argument` If the generation count is 0.
+     */
     void generationCount(std::size_t generationCount)
     {
         if (generationCount == 0)
@@ -36,6 +58,10 @@ public:
     }
 
     std::size_t populationSize() const { return m_populationSize; }
+    /**
+     * @brief Sets the number of individuals in each generation.
+     * @throws `std::invalid_argument` If the population size is 0 or less than the elite count.
+     */
     void populationSize(std::size_t populationSize)
     {
         if (populationSize == 0)
@@ -47,6 +73,10 @@ public:
     }
 
     std::size_t eliteCount() const { return m_eliteCount; }
+    /**
+     * @brief Sets the number of elite individuals to carry over to the next generation.
+     * @throws `std::invalid_argument` If the elite count is greater than the population size.
+     */
     void eliteCount(std::size_t eliteCount)
     {
         if (eliteCount > m_populationSize)
@@ -56,6 +86,10 @@ public:
     }
 
     double crossoverRate() const { return m_crossoverRate; }
+    /**
+     * @brief Sets the probability of crossover occurring between two parent sequences.
+     * @throws `std::invalid_argument` If the crossover rate is not between 0 and 1.
+     */
     void crossoverRate(double crossoverRate)
     {
         if (crossoverRate < 0 || crossoverRate > 1)

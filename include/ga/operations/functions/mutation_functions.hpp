@@ -5,7 +5,7 @@
 
 namespace ga::functions::Mutate
 {
-    // Swap the elements at two random indexes
+    /// Performs a swap mutation on a sequence by randomly selecting two different indices and swapping their values.
     template <typename Sequence>
     Sequence swap(const Sequence& seq, Random& rng)
     {
@@ -13,7 +13,6 @@ namespace ga::functions::Mutate
         Sequence newSequence { seq };
 
         std::size_t first { rng.getInteger<std::size_t>(0, seq.size() - 1) };
-
         std::size_t second { rng.getIntegerExclude<std::size_t>(0, seq.size() - 1, first) };
 
         std::swap(newSequence[first], newSequence[second]);

@@ -1,4 +1,4 @@
-Write in-code documentation.   
+~~Write in-code documentation.~~   
 Write external documentation.
 
 C++ Concepts/Constraints.   

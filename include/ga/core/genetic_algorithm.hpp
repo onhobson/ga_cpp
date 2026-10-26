@@ -25,12 +25,32 @@
 namespace ga
 {
 
+/**
+ * @brief A class that implements a genetic algorithm to evolve a population of chromosomes towards an optimal solution.
+ * 
+ * @tparam Sequence The type that is used by the given crossover and mutation operators.
+ * @tparam Fitness The type that is returned by the given evaluation function.
+ * @tparam URBG The type of the random number generator engine to use. Defaults to `std::mt19937`.
+ *         Must satisfy the requirements of a uniform random bit generator.
+ * 
+ * @throws `std::invalid_argument` If the configuration parameters or operators are invalid.
+ */
 template <typename Sequence, typename Fitness, std::uniform_random_bit_generator URBG = std::mt19937>
 class GeneticAlgorithm
 {
 public:
+    /// @brief Represents a member of the population, containing a `Sequence` and its associated `Fitness` value.
     using Chromosome = ga::Chromosome<Sequence, Fitness>;
 
+    /**
+     * @brief Constructs a GeneticAlgorithm object with the given base sequence, evaluation function, operators, configuration, and random number generator engine.
+     * 
+     * @param baseSequence The initial `Sequence` from which the population will be generated.
+     * @param evaluationFunction A function that takes a `Sequence` and returns its `Fitness` value.
+     * @param operators A `ga::Operators` struct containing the crossover and mutation operators to use.
+     * @param config A `ga::Config` object specifying the parameters of the genetic algorithm.
+     * @param randomEngine An optional random number generator engine to use. Defaults to a Mersenne Twister engine.
+     */
     GeneticAlgorithm(
         Sequence baseSequence,
         std::function<Fitness(const Sequence&)> evaluationFunction,
@@ -45,6 +65,9 @@ public:
         , m_rng { Random(randomEngine) }
     { } 
 
+    /**
+     * @brief Runs the genetic algorithm for the number of generations specified in the `ga::Config` object, and returns the best `Chromosome` found.
+     */
     Chromosome run()
     {
         initializePopulation();
@@ -154,6 +177,7 @@ private:
     {
         clearElites(m_elites);
 
+        // Push `eliteCount` number of chromosomes with highest fitness to `m_elites`
         for (const auto& chromosome : m_currentPopulation)
         {
             if (m_elites.size() < m_config.eliteCount())

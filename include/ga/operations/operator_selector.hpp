@@ -10,12 +10,21 @@
 
 namespace ga::detail
 {
-    
+
+/**
+ * @brief Selects an operation based on the weighted distribution of the operations.
+ * 
+ * @tparam Operation The object that is stored and returned based on weights
+ * 
+ * @throws `std::invalid_argument` If the operation configuration is invalid.
+ */
 template <typename Operation>
 class OperatorSelector
 {
 protected:
-    // Basic single op constructor
+    /**
+     * @brief Construct a new Operator Selector object with a single operation, automatically assigned a weight of 1.0.
+     */
     OperatorSelector(
         Operation operation
     ) : OperatorSelector(
@@ -23,7 +32,9 @@ protected:
         std::vector<double> { 1.0 }
     ) { }
 
-    // Full op list + weight list constructor
+    /**
+     * @brief Construct a new Operator Selector object with a vector of operations and a vector of associated weights.
+     */
     OperatorSelector(
         std::vector<Operation> operations,
         std::vector<double> weights
@@ -59,7 +70,12 @@ protected:
 
     std::vector<WeightedOperator> m_weightedOperators {};
 
-
+    /**
+     * @brief Selects an operation based on the weighted distribution of the operations.
+     * 
+     * @param rng The random number generator to use for selection.
+     * @return The selected operation.
+     */
     Operation getOperation(Random& rng) const
     {
         // Select operator based on predefined weights

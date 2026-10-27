@@ -25,7 +25,7 @@ public:
     { }
 
     /**
-     * @brief Calls the given evaluation function on each chromosome in the population, and updates the `fitness` member of each chromosome with the result.
+     * @brief Calls the given evaluation function on each chromosome in the population and updates the `fitness` member of each chromosome with the result.
      */
     void evaluate(std::vector<Chromosome>& population) const 
     {

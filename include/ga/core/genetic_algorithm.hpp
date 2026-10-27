@@ -78,9 +78,6 @@ public:
             createNewGeneration();
             
             evaluateCurrentGeneration();
-
-            printCurrentGeneration();
-            std::cout << "\n\n";
         }
 
         while (m_elites.size() > 1)

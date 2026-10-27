@@ -59,10 +59,7 @@ public:
      */
     Sequence operator()(const Sequence& seq1, const Sequence& seq2, Random& rng) const 
     {
-        CrossoverOperation op { this->getOperation(rng) };
-        
-        // Return Sequence result
-        return op(seq1, seq2, rng);
+        return this->getOperation(rng)(seq1, seq2, rng);
     }
 
 };

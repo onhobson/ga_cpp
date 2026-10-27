@@ -8,14 +8,8 @@ class MutateSwapTest : public testing::Test
 protected:
     ga::Random rng { ga::Random::generateMtEngine() };
 
-    std::vector<int> sampleSequence;
-    std::vector<int> returnSequence;
-
-    void SetUp() override
-    {
-        sampleSequence = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-        returnSequence = ga::functions::Mutate::swap(sampleSequence, rng);
-    }
+    std::vector<int> sampleSequence { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    std::vector<int> returnSequence { ga::functions::Mutate::swap(sampleSequence, rng) };
 };
 
 TEST_F(MutateSwapTest, SwapChangesSequence)

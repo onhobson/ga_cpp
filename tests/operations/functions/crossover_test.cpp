@@ -11,16 +11,9 @@ class CrossoverSinglePointTest : public testing::Test
 protected:
     ga::Random rng { ga::Random::generateMtEngine() };
 
-    std::vector<int> sampleSequence1;
-    std::vector<int> sampleSequence2;
-    std::vector<int> returnSequence;
-
-    void SetUp() override
-    {
-        sampleSequence1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-        sampleSequence2 = { 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
-        returnSequence = ga::functions::Crossover::singlePoint(sampleSequence1, sampleSequence2, rng);
-    }
+    std::vector<int> sampleSequence1 { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    std::vector<int> sampleSequence2 { 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
+    std::vector<int> returnSequence { ga::functions::Crossover::singlePoint(sampleSequence1, sampleSequence2, rng) };
 };
 
 TEST_F(CrossoverSinglePointTest, SinglePointChangesSequence)

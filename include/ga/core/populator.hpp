@@ -52,10 +52,6 @@ public:
         {
             std::shuffle(sequenceCopy.begin(), sequenceCopy.end(), rng.getEngine());
 
-            for (const auto& e : sequenceCopy)
-                std::cout << e << ", ";
-            std::cout << '\n';
-
             population.push_back(sequenceCopy);
         }
 

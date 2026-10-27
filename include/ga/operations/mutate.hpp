@@ -58,10 +58,7 @@ public:
      */
     Sequence operator()(const Sequence& seq, Random& rng) const 
     {
-        MutateOperation op { this->getOperation(rng) };
-        
-        // Return Sequence result
-        return op(seq, rng);
+        return this->getOperation(rng)(seq, rng);
     }
 
 };

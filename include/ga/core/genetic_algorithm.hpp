@@ -56,6 +56,7 @@ public:
         std::function<Fitness(const Sequence&)> evaluationFunction,
         Operators<Sequence> operators,
         Config config,
+        // void (*callback)(const std::vector<Chromosome>, Chromosome),
         URBG randomEngine = URBG ( std::move(Random::generateMtEngine()) )
     )
         : m_baseSequence { baseSequence }
@@ -80,10 +81,7 @@ public:
             evaluateCurrentGeneration();
         }
 
-        while (m_elites.size() > 1)
-            m_elites.pop();
-
-        return m_elites.top();
+        return *m_topElite;
     }
 
     void printCurrentGeneration() const
@@ -100,19 +98,13 @@ public:
     }
 
 private:
-    struct CompareFitness
-    {
-        bool operator()(const Chromosome& c1, const Chromosome& c2)
-        {
-            return c1.fitness > c2.fitness; // For min-heap
-        };
-    };
-
     const Sequence m_baseSequence {};
     std::function<Fitness(Sequence)> m_evaluationFunction {};
 
     std::vector<Chromosome> m_currentPopulation {};
-    std::priority_queue<Chromosome, std::vector<Chromosome>, CompareFitness> m_elites;
+    // Min-heap
+    std::vector<Chromosome*> m_elites;
+    Chromosome* m_topElite;
 
     const Config m_config;
     const detail::Populator<Sequence> m_populator;
@@ -132,6 +124,16 @@ private:
                 std::move(randomizedSequences[i]), 0
             });
         }
+
+        m_topElite = &m_currentPopulation[0];
+        for (std::size_t i {0}; i < m_config.eliteCount(); ++i)
+        {
+            m_elites.push_back(&m_currentPopulation[i]);
+
+            if (m_elites.back()->fitness > m_topElite->fitness)
+                m_topElite = m_elites.back();
+        }
+        std::ranges::make_heap(m_elites, std::ranges::greater{}, &Chromosome::fitness);
     }
 
     void createNewGeneration()
@@ -139,11 +141,14 @@ private:
         std::vector<Chromosome> newGeneration {};
         newGeneration.reserve(m_config.populationSize());
 
-        // Carry over elites
-        while (!m_elites.empty())
+        for (auto& elite : m_elites)
         {
-            newGeneration.push_back(m_elites.top());
-            m_elites.pop();
+            newGeneration.push_back(*elite);
+
+            if (elite == m_topElite)
+                m_topElite = &newGeneration.back();
+
+            elite = &newGeneration.back();
         }
 
         // Fill rest of population
@@ -161,7 +166,7 @@ private:
             });
         }    
 
-        m_currentPopulation = newGeneration;
+        m_currentPopulation = std::move(newGeneration);
     }
 
     void evaluateCurrentGeneration()
@@ -172,19 +177,17 @@ private:
 
     void selectElites()
     {
-        clearElites(m_elites);
-
-        // Push `eliteCount` number of chromosomes with highest fitness to `m_elites`
-        for (const auto& chromosome : m_currentPopulation)
+        for (std::size_t i {m_config.eliteCount()}; i < m_currentPopulation.size(); ++i)
         {
-            if (m_elites.size() < m_config.eliteCount())
+            if (m_elites.front()->fitness < m_currentPopulation[i].fitness)
             {
-                m_elites.push(chromosome);
-            }
-            else if (m_elites.top().fitness < chromosome.fitness)
-            {
-                m_elites.pop();
-                m_elites.push(chromosome);
+                std::ranges::pop_heap(m_elites, std::ranges::greater{}, &Chromosome::fitness);
+                
+                m_elites.back() = &m_currentPopulation[i];
+                if (m_currentPopulation[i].fitness > m_topElite->fitness)
+                    m_topElite = m_elites.back();
+
+                std::ranges::push_heap(m_elites, std::ranges::greater{}, &Chromosome::fitness);
             }
         }
     }
@@ -192,12 +195,6 @@ private:
     std::size_t getRandomPopulationIndex(std::size_t omit = -1)
     {
         return m_rng.getIntegerExclude<std::size_t>(0, m_config.populationSize() - 1, omit);
-    }
-    
-    template <typename Q>
-    void clearElites(Q& q)
-    {
-        q = Q();
     }
 };
 

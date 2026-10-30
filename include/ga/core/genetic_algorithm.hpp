@@ -66,10 +66,28 @@ public:
         , m_rng { Random(randomEngine) }
     { } 
 
+    /// @brief A no-operation callback that does nothing when invoked.
+    struct NoOpCallback
+    {
+        void operator()(const std::vector<Chromosome>&, const Chromosome&) const noexcept
+        { }
+    };
+
     /**
      * @brief Runs the genetic algorithm for the number of generations specified in the `ga::Config` object, and returns the best `Chromosome` found.
+     * 
+     * @param callback An optional callback function that is invoked at the end of each generation with the current population and the elite chromosome.
+     *                 Must be invocable with `const std::vector<Chromosome>&` and `const Chromosome&`.
+     * 
+     * @return The best `Chromosome` found after running the genetic algorithm for the specified number of generations.
      */
-    Chromosome run()
+    template <typename Callback = NoOpCallback>
+        requires std::invocable<
+            Callback&,                      // Fn
+            const std::vector<Chromosome>&, // Population
+            const Chromosome&               // Elite
+        >
+    Chromosome run(Callback&& callback = {})
     {
         initializePopulation();
         evaluateCurrentGeneration();
@@ -79,6 +97,12 @@ public:
             createNewGeneration();
             
             evaluateCurrentGeneration();
+
+            // const ref to ensure callback does not modify members
+            const std::vector<Chromosome>& currentPopulation = m_currentPopulation;
+            const Chromosome& elite = *m_topElite;
+
+            std::invoke(callback, currentPopulation, elite);
         }
 
         return *m_topElite;
@@ -102,6 +126,7 @@ private:
     std::function<Fitness(Sequence)> m_evaluationFunction {};
 
     std::vector<Chromosome> m_currentPopulation {};
+
     // Min-heap
     std::vector<Chromosome*> m_elites;
     Chromosome* m_topElite;
@@ -111,7 +136,7 @@ private:
     const detail::Evaluator<Sequence, Fitness> m_evaluator;
     Random m_rng {};
 
-
+    // Initializes the population with randomized sequences and sets up the elite min-heap.
     void initializePopulation()
     {
         m_currentPopulation.reserve(m_config.populationSize());
@@ -125,6 +150,7 @@ private:
             });
         }
 
+        // Initialize the elite min-heap with the front portion of the current population.
         m_topElite = &m_currentPopulation[0];
         for (std::size_t i {0}; i < m_config.eliteCount(); ++i)
         {
@@ -133,9 +159,11 @@ private:
             if (m_elites.back()->fitness > m_topElite->fitness)
                 m_topElite = m_elites.back();
         }
+
         std::ranges::make_heap(m_elites, std::ranges::greater{}, &Chromosome::fitness);
     }
 
+    // Creates a new generation of chromosomes by preserving elites and generating offspring from the current population.
     void createNewGeneration()
     {
         std::vector<Chromosome> newGeneration {};
@@ -145,9 +173,11 @@ private:
         {
             newGeneration.push_back(*elite);
 
+            // Ensure topElite ptr remains valid in new generation
             if (elite == m_topElite)
                 m_topElite = &newGeneration.back();
 
+            // ...as well as elite ptr
             elite = &newGeneration.back();
         }
 
@@ -169,20 +199,25 @@ private:
         m_currentPopulation = std::move(newGeneration);
     }
 
+    // Evaluates the fitness of the current generation and updates the elite min-heap accordingly.
     void evaluateCurrentGeneration()
     {
         m_evaluator.evaluate(m_currentPopulation);
         selectElites();
     }
 
+    // Selects the top-performing chromosomes from the current population and updates the elite min-heap.
     void selectElites()
     {
+        // Start after elite carry-over section of population
         for (std::size_t i {m_config.eliteCount()}; i < m_currentPopulation.size(); ++i)
         {
+            // If current fitness is better than worst in min-heap m_elites
             if (m_elites.front()->fitness < m_currentPopulation[i].fitness)
             {
                 std::ranges::pop_heap(m_elites, std::ranges::greater{}, &Chromosome::fitness);
                 
+                // Push current pop into m_elites, and check if top elite
                 m_elites.back() = &m_currentPopulation[i];
                 if (m_currentPopulation[i].fitness > m_topElite->fitness)
                     m_topElite = m_elites.back();

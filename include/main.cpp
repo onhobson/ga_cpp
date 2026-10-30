@@ -17,6 +17,20 @@ int evaluationFunction(const std::vector<int>& sequence)
     return fitness;
 }
 
+struct Callback
+{
+    int callCount {};
+    std::vector<int> topFitProgression;
+
+    void operator()(auto population, auto elite)
+    {
+        // ++callCount;
+        // std::cout << callCount << ' ' << population.size() << '\n';
+        // topFitProgression.push_back(elite.fitness);
+        elite.fitness = 0;
+    }
+};
+
 
 int main()
 {   
@@ -30,7 +44,6 @@ int main()
             ga::functions::Mutate::swap<Sequence>
         }
     };
-    
 
     ga::Config config {
         10,
@@ -47,11 +60,15 @@ int main()
     };
 
 
-    std::cout << "\nRUNNING\n\n";
+    std::cout << "\nRUNNING\n";
 
+    Callback cb {};
     ga::Chromosome elite { ga.run() };
 
-    std::cout << "Sequence: ";
+    for (auto n : cb.topFitProgression)
+        std::cout << n << ", ";
+
+    std::cout << "\nSequence: ";
 
     for (auto num : elite.sequence)
         std::cout << num << ' ';

@@ -13,6 +13,7 @@ Expand config options.
 
 Track inter-run metrics.   
 Create Result object to return result + metrics.
+Alternatively, use callback function to track metrics? Supply a pre-defined metric-collecting callback for optional use?
 
 Optimization
  - Parallelism

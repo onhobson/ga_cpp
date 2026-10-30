@@ -2,82 +2,259 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
+#include <random>
+#include <string>
 #include <vector>
 
 using Sequence = std::vector<int>;
-using Fitness = int;
-using Chromosome = ga::Chromosome<Sequence, Fitness>;
+using Chromosome = ga::Chromosome<Sequence, int>;
 
+// Provides default objects to pass into GeneticAlgorithm constructor in each test
+// Allows for tests to override certain defaults before instantiating ga::GeneticAlgorithm
 class GeneticAlgorithmTest : public testing::Test
 {
 protected:
-    int evalCount = 0;
-    int mutateCount = 0;
+    int evaluationCount = 0;
+    int crossoverCount = 0;
+    int mutationCount = 0;
 
-    Sequence baseSequence { 20, 19, 18, 17, 16 };
     ga::Config config { 10, 10, 2, 0.0 };
-
     ga::Operators<Sequence> operators {
-        ga::Crossover<Sequence>  { [](const Sequence& seq1, const Sequence& seq2, ga::Random& rng)
+        ga::Crossover<Sequence> {
+            [this](const Sequence& first, const Sequence&, ga::Random&)
             {
-                return seq1;
+                ++crossoverCount;
+                return first;
             }
         },
-        ga::Mutate<Sequence> { [this](const Sequence& seq, ga::Random& rng)
+        ga::Mutate<Sequence> {
+            [this](const Sequence& sequence, ga::Random& rng)
             {
-                ++mutateCount;
-                
-                Sequence newSeq;
-                for (auto n : seq)
-                    newSeq.push_back(n - 1);
-                
-                return newSeq;
+                ++mutationCount;
+                return sequence;
             }
         }
     };
 
-    Fitness evaluationFunction(const Sequence& seq)
+    std::vector<int> baseSequence { 1, 2, 3, 4, 5, 6, 7, 8 };
+
+    int evalFunction(const Sequence& seq)
     {
-        ++evalCount;
+        ++evaluationCount;
         return seq.front();
+    }
+
+    struct CountingCallback
+    {
+        int callbackCount = 0;
+
+        void operator()(const std::vector<Chromosome>&, const Chromosome&)
+        {
+            ++callbackCount;
+        }
     };
 
-    ga::GeneticAlgorithm<Sequence, Fitness> ga;
-
-    GeneticAlgorithmTest()
-        : ga {
-            baseSequence,
-            [this](const Sequence& seq) { return evaluationFunction(seq); },
-            operators,
-            config
-        }
-    { }
+    CountingCallback cb {};
 };
 
 
 TEST_F(GeneticAlgorithmTest, RunCallsEvaluationFunctionCorrectAmount)
 {
+    ga::GeneticAlgorithm<Sequence, int> ga {
+        baseSequence,
+        [this](const Sequence& seq) { return evalFunction(seq); },
+        operators,
+        config
+    };
+
     ga.run();
 
     // +1 because initial pop is evaluated once before run() loop
-    int expectedEvalCalls = config.populationSize() * (config.generationCount() + 1); 
+    int expectedEvaluationCalls = config.populationSize() * (config.generationCount() + 1); 
 
-    EXPECT_EQ(evalCount, expectedEvalCalls); 
+    EXPECT_EQ(evaluationCount, expectedEvaluationCalls); 
 }
 
 TEST_F(GeneticAlgorithmTest, RunCallsOperatorFunctionCorrectAmount)
 {
+    ga::GeneticAlgorithm<Sequence, int> ga {
+        baseSequence,
+        [this](const Sequence& seq) { return evalFunction(seq); },
+        operators,
+        config
+    };
+
     ga.run();
 
     int expectedOperatorCalls = config.generationCount() * (config.populationSize() - config.eliteCount());
 
-    EXPECT_EQ(mutateCount, expectedOperatorCalls);
+    EXPECT_EQ(crossoverCount, 0);
+    EXPECT_EQ(mutationCount, expectedOperatorCalls);
 }
 
-TEST_F(GeneticAlgorithmTest, EliteSelectionKeepsFittestChromosome)
+TEST_F(GeneticAlgorithmTest, RunCallsCallbackFunctionCorrectAmount)
 {
-    Chromosome best { ga.run() };
+    ga::GeneticAlgorithm<Sequence, int> ga {
+        baseSequence,
+        [this](const Sequence& seq) { return evalFunction(seq); },
+        operators,
+        config
+    };
 
-    EXPECT_EQ(best.fitness, baseSequence.front());
+    ga.run(cb);
+
+    EXPECT_EQ(cb.callbackCount, config.generationCount());
 }
 
+TEST_F(GeneticAlgorithmTest, RunReturnsTopChromosome)
+{
+    // baseSequence is highest fitness possible with evalFunc/mutate operator.
+    // Call run() and check that baseSequence kept and returned
+
+    baseSequence = { 10 };
+
+    operators.mutate = {{
+        [](const Sequence& seq, ga::Random&)
+        {
+            return Sequence { seq.front() - 1 };
+        }
+    }};
+    
+    for (const std::size_t eliteCount : { 0, 1 } )
+    {
+        config.eliteCount(eliteCount);
+
+        ga::GeneticAlgorithm<Sequence, int> ga {
+            baseSequence,
+            [this](const Sequence& seq){ return evalFunction(seq); },
+            operators,
+            config
+        };
+
+        Chromosome result = ga.run();
+
+        EXPECT_EQ(result.sequence, baseSequence);
+        EXPECT_EQ(result.fitness, evalFunction(baseSequence));
+    }
+}
+
+
+TEST_F(GeneticAlgorithmTest, CarriesElitesBetweenGenerations)
+{
+    operators.mutate = {{
+        ga::functions::Mutate::swap<Sequence>
+    }};
+
+    for (const std::size_t eliteCount : { 1, 3 })
+    {
+        SCOPED_TRACE("eliteCount=" + std::to_string(eliteCount));
+        config.eliteCount(eliteCount);
+
+        // Remember top chromosomes from prev generation
+        std::vector<Chromosome> prevTop;
+
+        // Lehmer code to create unique fitness for each sequence permutation
+        auto evalFunc = [](const Sequence& seq)
+        {
+            Sequence tmp { seq };
+            std::ranges::sort(tmp);
+
+            int n = static_cast<int>(seq.size());
+            int fitness = 0;
+
+            auto factorial = [](int n)
+            {
+                int result = 1;
+                for (int i = 1; i <= n; ++i)
+                {
+                    result *= i;
+                }
+                return result;
+            };
+
+            for (std::size_t i = 0; i < seq.size(); ++i)
+            {
+                auto it = std::ranges::find(tmp, seq[i]);
+                int rank = it - tmp.begin();
+
+                tmp.erase(it);
+
+                fitness += rank * factorial(n - 1 - i);
+            }
+
+            return fitness;
+        };
+
+        ga::GeneticAlgorithm<Sequence, int> ga {
+            baseSequence,
+            evalFunc,
+            operators,
+            config
+        };
+
+        const Chromosome result = ga.run(
+            [this, &prevTop, eliteCount] (const std::vector<Chromosome>& population, const Chromosome& elite)
+            {
+                ASSERT_EQ(population.size(), config.populationSize());
+
+                if (prevTop.empty()) // First iteration
+                {
+                    // Copy top eliteCount chromosomes to prevTop
+                    std::vector<Chromosome> tmpPop { population };
+                    std::ranges::sort(tmpPop, std::ranges::greater{}, &Chromosome::fitness);
+                    std::ranges::copy_n(tmpPop.begin(), eliteCount, std::back_inserter(prevTop));
+                    return;
+                }
+                
+                // Get elites in sorted order, for easy comparison with prevTop
+                std::vector<Chromosome> elites;
+                std::ranges::copy_n(population.begin(), eliteCount, std::back_inserter(elites));
+                std::ranges::sort(elites, std::ranges::greater{}, &Chromosome::fitness);
+
+                // Compare saved elites against prevTop
+                ASSERT_EQ(elites.size(), prevTop.size());
+                for (std::size_t i = 0; i < eliteCount; ++i)
+                {
+                    EXPECT_EQ(elites[i].sequence, prevTop[i].sequence);
+                    EXPECT_EQ(elites[i].fitness, prevTop[i].fitness);
+                }
+
+                // Update prevTop
+                std::vector<Chromosome> tmpPop { population };
+                std::ranges::sort(tmpPop, std::ranges::greater{}, &Chromosome::fitness);
+                std::ranges::copy_n(tmpPop.begin(), eliteCount, prevTop.begin());
+            }
+        );
+    }
+}
+
+TEST_F(GeneticAlgorithmTest, ZeroEliteCountDoesntCarry)
+{
+    config.eliteCount(0);
+    baseSequence = { 10 };
+
+    operators.mutate = {{
+        [](const Sequence& seq, ga::Random&)
+        {
+            return Sequence { seq.front() - 1 };
+        }
+    }};
+    
+    ga::GeneticAlgorithm<Sequence, int> ga {
+        baseSequence,
+        [this](const Sequence& seq){ return evalFunction(seq); },
+        operators,
+        config
+    };
+
+    int count = 0;
+
+    ga.run(
+        [this, &count](const std::vector<Chromosome>& population, const Chromosome&)
+        {
+            ++count;
+            EXPECT_EQ(population.front().fitness, baseSequence.front() - count);
+        }
+    );
+}

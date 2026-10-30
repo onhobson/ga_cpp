@@ -76,7 +76,7 @@ public:
     /**
      * @brief Runs the genetic algorithm for the number of generations specified in the `ga::Config` object, and returns the best `Chromosome` found.
      * 
-     * @param callback An optional callback function that is invoked at the end of each generation with the current population and the elite chromosome.
+     * @param callback An optional callback function that is invoked at the end of each generation with the current population and the current best solution.
      *                 Must be invocable with `const std::vector<Chromosome>&` and `const Chromosome&`.
      * 
      * @return The best `Chromosome` found after running the genetic algorithm for the specified number of generations.
@@ -100,12 +100,13 @@ public:
 
             // const ref to ensure callback does not modify members
             const std::vector<Chromosome>& currentPopulation = m_currentPopulation;
-            const Chromosome& elite = *m_topElite;
+            const Chromosome& bestSolution = m_bestSolution;
 
-            std::invoke(callback, currentPopulation, elite);
+            std::invoke(callback, currentPopulation, bestSolution);
         }
 
-        return *m_topElite;
+        
+        return m_bestSolution;
     }
 
     void printCurrentGeneration() const
@@ -129,7 +130,9 @@ private:
 
     // Min-heap
     std::vector<Chromosome*> m_elites;
-    Chromosome* m_topElite;
+
+    // Stores best solution found during evaluation.
+    Chromosome m_bestSolution;
 
     const Config m_config;
     const detail::Populator<Sequence> m_populator;
@@ -151,13 +154,9 @@ private:
         }
 
         // Initialize the elite min-heap with the front portion of the current population.
-        m_topElite = &m_currentPopulation[0];
         for (std::size_t i {0}; i < m_config.eliteCount(); ++i)
         {
             m_elites.push_back(&m_currentPopulation[i]);
-
-            if (m_elites.back()->fitness > m_topElite->fitness)
-                m_topElite = m_elites.back();
         }
 
         std::ranges::make_heap(m_elites, std::ranges::greater{}, &Chromosome::fitness);
@@ -173,11 +172,7 @@ private:
         {
             newGeneration.push_back(*elite);
 
-            // Ensure topElite ptr remains valid in new generation
-            if (elite == m_topElite)
-                m_topElite = &newGeneration.back();
-
-            // ...as well as elite ptr
+            // Ensure elite ptr remains valid in new generation
             elite = &newGeneration.back();
         }
 
@@ -202,8 +197,13 @@ private:
     // Evaluates the fitness of the current generation and updates the elite min-heap accordingly.
     void evaluateCurrentGeneration()
     {
-        m_evaluator.evaluate(m_currentPopulation);
-        selectElites();
+        std::size_t bestIndex { m_evaluator.evaluate(m_currentPopulation) };
+
+        if (m_currentPopulation[bestIndex].fitness > m_bestSolution.fitness)
+            m_bestSolution = m_currentPopulation[bestIndex];
+
+        if (m_config.eliteCount() > 0)
+            selectElites();
     }
 
     // Selects the top-performing chromosomes from the current population and updates the elite min-heap.
@@ -217,10 +217,8 @@ private:
             {
                 std::ranges::pop_heap(m_elites, std::ranges::greater{}, &Chromosome::fitness);
                 
-                // Push current pop into m_elites, and check if top elite
+                // Push current pop into m_elites
                 m_elites.back() = &m_currentPopulation[i];
-                if (m_currentPopulation[i].fitness > m_topElite->fitness)
-                    m_topElite = m_elites.back();
 
                 std::ranges::push_heap(m_elites, std::ranges::greater{}, &Chromosome::fitness);
             }

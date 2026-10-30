@@ -26,13 +26,22 @@ public:
 
     /**
      * @brief Calls the given evaluation function on each chromosome in the population and updates the `fitness` member of each chromosome with the result.
+     * 
+     * @returns `std::size_t` The index of the chromosome with the highest fitness
      */
-    void evaluate(std::vector<Chromosome>& population) const 
+    std::size_t evaluate(std::vector<Chromosome>& population) const 
     {
-        for (auto& chromosome : population)
+        std::size_t best = 0;
+
+        for (std::size_t i = 0; i < population.size(); ++i)
         {
-            chromosome.fitness = m_evaluate(chromosome.sequence);
+            population[i].fitness = m_evaluate(population[i].sequence);
+
+            if (population[i].fitness > population[best].fitness)
+                best = i;
         }
+
+        return best;
     }
 
 private:

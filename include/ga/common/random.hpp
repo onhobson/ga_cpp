@@ -103,7 +103,7 @@ public:
         std::random_device rd {};
         std::seed_seq ss { rd(), rd(), rd(), rd(), rd(), rd(), rd(), rd() };
 
-        return std::move (std::mt19937 { ss } );
+        return std::mt19937 { ss };
     }
 
 private:

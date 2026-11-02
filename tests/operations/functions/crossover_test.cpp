@@ -1,4 +1,4 @@
-#include "ga/operations/functions/crossover_functions.hpp"
+#include "ga/operations/functions/crossover/misc.hpp"
 #include "ga/common/random.hpp"
 
 #include <gtest/gtest.h>
@@ -13,7 +13,7 @@ protected:
 
     std::vector<int> sampleSequence1 { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     std::vector<int> sampleSequence2 { 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
-    std::vector<int> returnSequence { ga::functions::Crossover::singlePoint(sampleSequence1, sampleSequence2, rng) };
+    std::vector<int> returnSequence { ga::functions::crossover::singlePoint(sampleSequence1, sampleSequence2, rng) };
 };
 
 TEST_F(CrossoverSinglePointTest, SinglePointChangesSequence)

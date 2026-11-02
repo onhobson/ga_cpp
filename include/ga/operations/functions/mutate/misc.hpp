@@ -1,9 +1,9 @@
-#ifndef GA_MUTATION_FUNCTIONS_HPP
-#define GA_MUTATION_FUNCTIONS_HPP
+#ifndef GA_MUTATE_MISC_FUNCTIONS_HPP
+#define GA_MUTATE_MISC_FUNCTIONS_HPP
 
-#include "../../common/random.hpp"
+#include "ga/common/random.hpp"
 
-namespace ga::functions::Mutate
+namespace ga::functions::mutate
 {
     /// Performs a swap mutation on a sequence by randomly selecting two different indices and swapping their values.
     template <typename Sequence>

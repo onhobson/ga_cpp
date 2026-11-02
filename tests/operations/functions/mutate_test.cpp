@@ -1,4 +1,4 @@
-#include "ga/operations/functions/mutation_functions.hpp"
+#include "ga/operations/functions/mutate/misc.hpp"
 #include "ga/common/random.hpp"
 
 #include <gtest/gtest.h>
@@ -9,7 +9,7 @@ protected:
     ga::Random rng { ga::Random::generateMtEngine() };
 
     std::vector<int> sampleSequence { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-    std::vector<int> returnSequence { ga::functions::Mutate::swap(sampleSequence, rng) };
+    std::vector<int> returnSequence { ga::functions::mutate::swap(sampleSequence, rng) };
 };
 
 TEST_F(MutateSwapTest, SwapChangesSequence)

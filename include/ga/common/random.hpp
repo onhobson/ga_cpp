@@ -2,10 +2,14 @@
 #define GA_RANDOM_HPP
 
 #include <cstdint>
+#include <algorithm>
 #include <limits>
 #include <memory>
 #include <random>
+#include <stdexcept>
 #include <utility>
+#include <vector>
+#include <concepts>
 
 namespace ga
 {
@@ -21,6 +25,7 @@ public:
     template <std::uniform_random_bit_generator URBG>
     explicit Random(URBG engine) 
         : m_engine { std::make_unique<EngineModel<URBG>>(std::move(engine)) }
+        , m_impl { *m_engine }
     { }
 
 
@@ -35,13 +40,12 @@ public:
      * 
      * @throws `std::invalid_argument` If `min` is greater than `max`.
      */
-    template <typename T = int>
+    template <std::integral T = int>
     T getInteger(T min, T max) {
         if (min > max)
             throw std::invalid_argument("min value greater than max value");
 
-        ErasedURBG engine { *m_engine };
-        return std::uniform_int_distribution<T>{min, max}( engine );
+        return std::uniform_int_distribution<T>{min, max}( m_impl );
     }
 
 
@@ -58,24 +62,70 @@ public:
      * @throws `std::invalid_argument` If `min` is greater than `max`.
      * @throws `std::invalid_argument` If `min` equals `max` and both equal `exclude`.
      */
-    template <typename T = int>
+    template <std::integral T = int>
     T getIntegerExclude(T min, T max, T exclude) {
         if (min > max)
             throw std::invalid_argument("min value greater than max value");
         if (min == max && max == exclude)
             throw std::invalid_argument("Impossible request: min == max == exclude");
 
-        ErasedURBG engine { *m_engine };
         T num;
         std::uniform_int_distribution<T> dist {min, max};
 
         do
         {
-            num = dist(engine);
+            num = dist(m_impl);
         } while (num == exclude);
         
         return num;
     }
+
+    /**
+     * @brief Generates a random integer between `min` and `max` (inclusive), excluding specific values.
+     * @throws `std::invalid_argument` If `min` is greater than `max` or every value in the range is excluded.
+     */
+    template <std::integral T = int>
+    T getIntegerExclude(T min, T max, const std::vector<T>& exclude) {
+        if (min > max)
+            throw std::invalid_argument("min value greater than max value");
+
+        // Clean exclude: bound, sort & remove duplicates
+        std::vector<T> excludedInRange;
+        for (const T value : exclude) {
+            if (value >= min && value <= max)
+                excludedInRange.push_back(value);
+        }
+        std::ranges::sort(excludedInRange);
+        excludedInRange.erase(std::unique(excludedInRange.begin(), excludedInRange.end()), excludedInRange.end());
+
+        // Iterate each possible value until one is not contained in exclude list
+        T expected = min;
+        bool allExcluded = true;
+        bool reachedMax = false;
+        for (const T value : excludedInRange) {
+            if (value != expected) {
+                allExcluded = false;
+                break;
+            }
+            if (value == max) {
+                reachedMax = true;
+                break;
+            }
+            ++expected;
+        }
+        if (allExcluded && reachedMax)
+            throw std::invalid_argument("Impossible request: every value in range is excluded");
+
+        std::uniform_int_distribution<T> dist {min, max};
+        T num;
+        do {
+            num = dist(m_impl);
+        } while (std::ranges::binary_search(excludedInRange, num));
+
+        return num;
+    }
+
+    
 
     /**
      * @brief Generates a random real number between `min` and `max`.
@@ -88,13 +138,12 @@ public:
      * 
      * @throws `std::invalid_argument` If `min` is greater than `max`.
      */
-    template <typename T = double>
+    template <std::floating_point T = double>
     T getReal(T min, T max) {
         if (min > max)
             throw std::invalid_argument("min value greater than max value");
 
-        ErasedURBG engine { *m_engine };
-        return std::uniform_real_distribution<T>{min, max}(engine);
+        return std::uniform_real_distribution<T>{min, max}(m_impl);
     }
     
     /// @brief Generates a Mersenne Twister engine initialized with a 256 bit seed sequence.
@@ -164,6 +213,7 @@ private:
     };
 
     std::unique_ptr<EngineConcept> m_engine;
+    ErasedURBG m_impl;
 
 
     

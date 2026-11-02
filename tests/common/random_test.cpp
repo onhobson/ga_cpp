@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <random>
 #include <stdexcept>
+#include <vector>
 
 #pragma region Core_Functionality
 
@@ -62,6 +63,21 @@ TEST_F(RandomTest, GetIntegerExcludeWithDifferentTypes)
     EXPECT_NE(unsignedValue, 2);
 }
 
+TEST_F(RandomTest, GetIntegerExcludeWithMultipleValues)
+{
+    const std::vector<int> excluded { 2, 3 };
+
+    for (int i = 0; i < 100; ++i)
+    {
+        const int value = rng.getIntegerExclude(1, 4, excluded);
+
+        EXPECT_GE(value, 1);
+        EXPECT_LE(value, 4);
+        EXPECT_NE(value, 2);
+        EXPECT_NE(value, 3);
+    }
+}
+
 TEST_F(RandomTest, GetReal)
 {
     const double value = rng.getReal(2.5, 3.5);
@@ -109,6 +125,12 @@ TEST_F(RandomTest, GetIntegerExcludeThrowsForInvalidBoundsOrImpossibleExclusion)
 {
     EXPECT_THROW(rng.getIntegerExclude(2, 1, 0), std::invalid_argument);
     EXPECT_THROW(rng.getIntegerExclude(2, 2, 2), std::invalid_argument);
+}
+
+TEST_F(RandomTest, GetIntegerExcludeWithMultipleValuesThrowsForInvalidBoundsOrImpossibleExclusion)
+{
+    EXPECT_THROW(rng.getIntegerExclude(2, 1, std::vector<int> { 0 }), std::invalid_argument);
+    EXPECT_THROW(rng.getIntegerExclude(1, 3, std::vector<int> { 1, 2, 3 }), std::invalid_argument);
 }
 
 TEST_F(RandomTest, GetRealThrowsWhenMinimumExceedsMaximum)

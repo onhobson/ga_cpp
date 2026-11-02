@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <array>
 #include <cstdint>
 #include <random>
 #include <stdexcept>
@@ -113,6 +114,17 @@ TEST(EdgeRecombinationTest, ReturnsAValidPermutation)
         EXPECT_EQ(child.front(), parent1.front()) << "seed: " << seed;
         expectPermutationOf(child, parent1);
     }
+}
+
+TEST(EdgeRecombinationTest, SupportsFixedSizeRanges)
+{
+    const std::array<int, 4> parent1 { 1, 2, 3, 4 };
+    const std::array<int, 4> parent2 { 3, 1, 4, 2 };
+    auto rng { makeRandom(4) };
+
+    const auto child { ga::functions::crossover::edgeRecombination(parent1, parent2, rng) };
+
+    expectPermutationOf(child, parent1);
 }
 
 TEST(EdgeRecombinationTest, PreservesAvailableParentEdges)

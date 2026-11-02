@@ -5,6 +5,7 @@
 
 #include <gtest/gtest.h>
 
+#include <array>
 #include <cstdint>
 #include <stdexcept>
 #include <string>
@@ -79,6 +80,17 @@ TEST(OrderCrossoverTest, SupportsStringGenes)
     const auto child { ga::functions::crossover::order(parent1, parent2, rng) };
 
     ASSERT_EQ(child.size(), parent1.size());
+    expectPermutationOf(child, parent1);
+}
+
+TEST(OrderCrossoverTest, SupportsFixedSizeRanges)
+{
+    const std::array<int, 4> parent1 { 1, 2, 3, 4 };
+    const std::array<int, 4> parent2 { 3, 1, 4, 2 };
+    auto rng { makeRandom(4) };
+
+    const auto child { ga::functions::crossover::order(parent1, parent2, rng) };
+
     expectPermutationOf(child, parent1);
 }
 

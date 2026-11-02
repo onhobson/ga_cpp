@@ -6,6 +6,7 @@
 #include "ga/common/hash.hpp"
 
 #include <algorithm>
+#include <ranges>
 #include <vector>
 #include <unordered_set>
 
@@ -29,35 +30,40 @@ namespace ga::functions::crossover
              constraints::Hashable<typename Sequence::value_type>)
     Sequence alternatingEdge(const Sequence& parent1, const Sequence& parent2, Random& rng)
     {
-        if (parent1.empty() || parent1.size() != parent2.size())
+        const std::size_t size { std::ranges::size(parent1) };
+        if (size == 0 || size != std::ranges::size(parent2))
             throw std::invalid_argument("Invalid sequence size");
             
         using Gene = typename Sequence::value_type;
 
-        const std::size_t size { parent1.size() };
+        const auto parent1Begin { std::ranges::begin(parent1) };
         std::unordered_set<Gene, ga::Hash<Gene>> used {};
-        Sequence child {};
+        Sequence child { parent1 };
+        auto childBegin { std::ranges::begin(child) };
 
         const std::size_t startIndex { rng.template getInteger<std::size_t>(0, size - 1) };
-        Gene current { parent1[startIndex] };
-        child.push_back(current);
+        Gene current { parent1Begin[startIndex] };
+        std::size_t childSize {};
+        childBegin[childSize++] = current;
         used.insert(current);
 
         bool parentOne { (rng.getInteger(0, 1)) ? true : false };
 
-        while (child.size() < size)
+        while (childSize < size)
         {
             // Switch the parent used every iteration
             const Sequence& parent { parentOne ? parent1 : parent2 };
+            const auto parentBegin { std::ranges::begin(parent) };
+            const auto parentEnd { std::ranges::end(parent) };
 
-            const auto currentPosition { std::find(parent.begin(), parent.end(), current) };
+            const auto currentPosition { std::ranges::find(parent, current) };
             std::vector<Gene> candidates {};
 
-            if (currentPosition != parent.end())
+            if (currentPosition != parentEnd)
             {
                 // Get next Gene after current
-                const std::size_t index { static_cast<std::size_t>(currentPosition - parent.begin()) };
-                const Gene& next { parent[(index + 1) % size] };
+                const std::size_t index { static_cast<std::size_t>(currentPosition - parentBegin) };
+                const Gene& next { parentBegin[(index + 1) % size] };
                 
                 if (!used.contains(next))
                 {
@@ -81,7 +87,7 @@ namespace ga::functions::crossover
 
             const std::size_t choice { rng.template getInteger<std::size_t>(0, candidates.size() - 1) };
             current = candidates[choice];
-            child.push_back(current);
+            childBegin[childSize++] = current;
             used.insert(current);
         }
 
@@ -105,7 +111,8 @@ namespace ga::functions::crossover
              constraints::Hashable<typename Sequence::value_type>)
     Sequence order(const Sequence& parent1, const Sequence& parent2, Random& rng)
     {
-        if (parent1.size() < 2 || parent1.size() != parent2.size())
+        const std::size_t size { std::ranges::size(parent1) };
+        if (size < 2 || size != std::ranges::size(parent2))
             throw std::invalid_argument("Invalid sequence size");
 
         using Gene = typename Sequence::value_type;
@@ -113,25 +120,27 @@ namespace ga::functions::crossover
         Sequence child { parent1 };
         std::unordered_set<Gene, ga::Hash<Gene>> used {};
 
-        const std::size_t size { parent1.size() };
+        const auto parent1Begin { std::ranges::begin(parent1) };
+        const auto parent2Begin { std::ranges::begin(parent2) };
+        auto childBegin { std::ranges::begin(child) };
 
         // Copy subsequence from parent1        
         const std::size_t firstCut { rng.template getInteger<std::size_t>(0, size - 1) };
         const std::size_t secondCut { rng.template getInteger<std::size_t>(firstCut + 1, size) };
 
         for (std::size_t i { firstCut }; i < secondCut; ++i)
-            used.insert(parent1[i]);
+            used.insert(parent1Begin[i]);
 
         // Copy remaining from parent2 using vertex ordering
         std::size_t childIndex { (secondCut < size) ? secondCut : 0 };
         for (std::size_t offset { 0 }; offset < size; ++offset)
         {
-            const Gene& gene { parent2[(secondCut + offset) % size] };
+            const Gene& gene { parent2Begin[(secondCut + offset) % size] };
 
             if (used.contains(gene))
                 continue;
 
-            child[childIndex] = gene;
+            childBegin[childIndex] = gene;
             used.insert(gene);
             childIndex = (childIndex + 1) % size;
         }
@@ -155,11 +164,12 @@ namespace ga::functions::crossover
              constraints::Hashable<typename Sequence::value_type>)
     Sequence edgeRecombination(const Sequence& parent1, const Sequence& parent2, Random& rng)
     {
-        if (parent1.empty() || parent1.size() != parent2.size())
+        const std::size_t size { std::ranges::size(parent1) };
+        if (size == 0 || size != std::ranges::size(parent2))
             throw std::invalid_argument("Invalid sequence size");
 
         using Gene = typename Sequence::value_type;
-        const std::size_t size { parent1.size() };
+        const auto parent1Begin { std::ranges::begin(parent1) };
 
         // Create adjacency lists
         using AdjList = std::unordered_set<Gene, ga::Hash<Gene>>;
@@ -173,16 +183,18 @@ namespace ga::functions::crossover
             const Sequence& parent { (parentChoice) ? parent2 : parent1 };
             auto& adjList { (parentChoice) ? adjPar2 : adjPar1 };
 
+            const auto parentBegin { std::ranges::begin(parent) };
+
             for (std::size_t i { 0 }; i < size; ++i)
             {
                 // Add values to the left and right to adj list
                 const std::size_t left { (i + size - 1) % size };
                 const std::size_t right { (i + 1) % size };
 
-                if (adjList.contains(parent[i]))
+                if (adjList.contains(parentBegin[i]))
                     throw std::invalid_argument("seq" + std::to_string(parentChoice + 1) + " is not a permutation");
 
-                adjList[parent[i]].insert({ parent[left], parent[right] });
+                adjList[parentBegin[i]].insert({ parentBegin[left], parentBegin[right] });
             }
         }
 
@@ -200,14 +212,16 @@ namespace ga::functions::crossover
             adjCombined[gene].insert(adjPar2[gene].begin(), adjPar2[gene].end());
         }
 
-        Sequence child {};
+        Sequence child { parent1 };
+        auto childBegin { std::ranges::begin(child) };
 
-        Gene gene { parent1[0] }; //(rng.getInteger(0, 1)) ? parent1[0] : parent2[0] };
+        Gene gene { parent1Begin[0] };
         std::unordered_set<Gene, ga::Hash<Gene>> used;
-        child.push_back(gene);
+        std::size_t childSize {};
+        childBegin[childSize++] = gene;
         used.insert(gene);
 
-        while (child.size() < parent1.size())
+        while (childSize < size)
         {
             // Remove gene from all adj lists
             for (auto& [_, adjList] : adjCombined)
@@ -257,7 +271,7 @@ namespace ga::functions::crossover
                 gene = candidates[ rng.getInteger<std::size_t>(0, candidates.size() - 1) ];
             }
 
-            child.push_back(gene);
+            childBegin[childSize++] = gene;
             used.insert(gene);
         }
 

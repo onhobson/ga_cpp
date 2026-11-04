@@ -15,14 +15,27 @@ inline ga::Random makeRandom(std::uint32_t seed)
 
 
 template <typename Sequence>
-inline void expectPermutationOf(const Sequence& actual, Sequence expected)
+inline void expectPermutationOf(Sequence actual, Sequence expected)
 {
     std::sort(expected.begin(), expected.end());
-    Sequence sortedActual { actual };
-    std::sort(sortedActual.begin(), sortedActual.end());
+    std::sort(actual.begin(), actual.end());
 
-    EXPECT_EQ(sortedActual, expected);
+    EXPECT_EQ(actual, expected);
 }
 
+template <typename Sequence>
+inline void outputsPermutation(Sequence& parent, std::function<Sequence(const Sequence&, ga::Random&)> operation, std::uint32_t count = 32)
+{
+    for (std::uint32_t seed { 0 }; seed < count; ++seed)
+    {
+        auto rng { makeRandom(seed) };
+        std::ranges::shuffle(parent, rng.getEngine());
+
+        const auto child { operation(parent, rng) };
+        
+        ASSERT_EQ(child.size(), parent.size());
+        expectPermutationOf(parent, child);
+    }
+}
 
 #endif 

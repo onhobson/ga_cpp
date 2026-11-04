@@ -143,7 +143,7 @@ TEST_F(GeneticAlgorithmTest, RunReturnsTopChromosome)
 TEST_F(GeneticAlgorithmTest, CarriesElitesBetweenGenerations)
 {
     operators.mutate = {{
-        ga::functions::Mutate::swap<Sequence>
+        ga::functions::mutate::swap<Sequence>
     }};
 
     for (const std::size_t eliteCount : { 1, 3 })

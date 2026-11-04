@@ -33,12 +33,14 @@ package_add_test(operations
 )
 
 package_add_test(operation_functions
-    operations/functions/mutate_test.cpp
     operations/functions/crossover_test.cpp
     operations/functions/crossover/alternating_edge_test.cpp
     operations/functions/crossover/order_test.cpp
     operations/functions/crossover/edge_recombination_test.cpp
     operations/functions/mutate/insert_test.cpp
+    operations/functions/mutate/inversion_test.cpp
+    operations/functions/mutate/scramble_test.cpp
+    operations/functions/mutate/swap_test.cpp
 )
 
 package_add_test(core

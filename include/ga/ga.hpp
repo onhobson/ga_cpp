@@ -6,7 +6,6 @@
 #include "operations/functions/crossover/misc.hpp"
 #include "operations/functions/crossover/permutation.hpp"
 
-#include "operations/functions/mutate/misc.hpp"
 #include "operations/functions/mutate/permutation.hpp"
 
 #endif  

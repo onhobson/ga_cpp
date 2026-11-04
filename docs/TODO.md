@@ -8,7 +8,11 @@ Error checking on user inputs. (Anything not handled by Concepts)
 
 Add more operator functions: binary, continuous optimization/real, etc.
 
-Expand config options.
+Expand config options:
+ - Tournament selection
+ - Fitness threshold
+ - Stagnation limit + tolerance
+ - Callback interval
 
 Track inter-run metrics.   
 Create Result object to return result + metrics.

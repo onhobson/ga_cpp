@@ -13,7 +13,12 @@ class PopulatorTest : public testing::Test
 {
 protected:
     int crossoverCount = 0;
-    ga::Config config { 10, 10, 2, 0.7 };
+    ga::Config config {
+        .generationCount = 10,
+        .populationSize = 10,
+        .eliteCount = 2,
+        .crossoverRate = 0.7
+    };
     ga::Random rng { ga::Random::generateMtEngine() };
 
     ga::Crossover<Sequence> crossover;
@@ -51,7 +56,7 @@ TEST_F(PopulatorTest, CreateRandomizedPopulationReturnsCorrectAmount)
 
     std::vector<Sequence> population { populator.createRandomizedPopulation(baseSequence, rng) };
 
-    EXPECT_EQ(population.size(), config.populationSize());
+    EXPECT_EQ(population.size(), config.populationSize);
 }
 
 TEST_F(PopulatorTest, CreateRandomizedPopulationReturnsShuffledSequences)
@@ -82,5 +87,5 @@ TEST_F(PopulatorTest, CreateSequenceFollowsCrossoverRate)
         populator.createSequence(sequence1, sequence2, rng);
     }
 
-    EXPECT_NEAR(crossoverCount, sampleCount * config.crossoverRate(), sampleCount * 0.05);
+    EXPECT_NEAR(crossoverCount, sampleCount * config.crossoverRate, sampleCount * 0.05);
 }

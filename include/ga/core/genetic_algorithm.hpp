@@ -56,15 +56,22 @@ public:
         std::function<Fitness(const Sequence&)> evaluationFunction,
         Operators<Sequence> operators,
         Config config,
-        // void (*callback)(const std::vector<Chromosome>, Chromosome),
         URBG randomEngine = URBG ( std::move(Random::generateMtEngine()) )
     )
         : m_baseSequence { baseSequence }
         , m_evaluator { evaluationFunction }
         , m_config { config }
-        , m_populator { detail::Populator<Sequence>(operators.crossover, operators.mutate, m_config) }
+        , m_populator { 
+            detail::Populator<Sequence>(
+                operators.crossover, 
+                operators.mutate,
+                m_config
+            )}
         , m_rng { Random(randomEngine) }
-    { } 
+    { 
+        m_config.validate();
+    } 
+
 
     /// @brief A no-operation callback that does nothing when invoked.
     struct NoOpCallback
@@ -92,7 +99,7 @@ public:
         initializePopulation();
         evaluateCurrentGeneration();
         
-        for (int i {0}; i < m_config.generationCount(); ++i)
+        for (int i {0}; i < m_config.generationCount; ++i)
         {
             createNewGeneration();
             
@@ -142,7 +149,7 @@ private:
     // Initializes the population with randomized sequences and sets up the elite min-heap.
     void initializePopulation()
     {
-        m_currentPopulation.reserve(m_config.populationSize());
+        m_currentPopulation.reserve(m_config.populationSize);
         
         std::vector<Sequence> randomizedSequences { m_populator.createRandomizedPopulation(m_baseSequence, m_rng) };
 
@@ -154,7 +161,7 @@ private:
         }
 
         // Initialize the elite min-heap with the front portion of the current population.
-        for (std::size_t i {0}; i < m_config.eliteCount(); ++i)
+        for (std::size_t i {0}; i < m_config.eliteCount; ++i)
         {
             m_elites.push_back(&m_currentPopulation[i]);
         }
@@ -166,7 +173,7 @@ private:
     void createNewGeneration()
     {
         std::vector<Chromosome> newGeneration {};
-        newGeneration.reserve(m_config.populationSize());
+        newGeneration.reserve(m_config.populationSize);
 
         for (auto& elite : m_elites)
         {
@@ -177,7 +184,7 @@ private:
         }
 
         // Fill rest of population
-        while (newGeneration.size() < m_config.populationSize())
+        while (newGeneration.size() < m_config.populationSize)
         {
             std::size_t firstIndex { getRandomPopulationIndex() };
             std::size_t secondIndex { getRandomPopulationIndex(firstIndex) };
@@ -202,7 +209,7 @@ private:
         if (m_currentPopulation[bestIndex].fitness > m_bestSolution.fitness)
             m_bestSolution = m_currentPopulation[bestIndex];
 
-        if (m_config.eliteCount() > 0)
+        if (m_config.eliteCount > 0)
             selectElites();
     }
 
@@ -210,7 +217,7 @@ private:
     void selectElites()
     {
         // Start after elite carry-over section of population
-        for (std::size_t i {m_config.eliteCount()}; i < m_currentPopulation.size(); ++i)
+        for (std::size_t i {m_config.eliteCount}; i < m_currentPopulation.size(); ++i)
         {
             // If current fitness is better than worst in min-heap m_elites
             if (m_elites.front()->fitness < m_currentPopulation[i].fitness)
@@ -227,9 +234,14 @@ private:
 
     std::size_t getRandomPopulationIndex(std::size_t omit = -1)
     {
-        return m_rng.getIntegerExclude<std::size_t>(0, m_config.populationSize() - 1, omit);
+        return m_rng.getIntegerExclude<std::size_t>(0, m_config.populationSize - 1, omit);
     }
 };
+
+
+// Deduction Guide:
+template <typename Sequence, typename Fitness, typename URBG>
+GeneticAlgorithm(Sequence, std::function<Fitness(const Sequence&)>, Operators<Sequence>, Config, URBG) -> GeneticAlgorithm<Sequence, Fitness, URBG>;
 
 }
 

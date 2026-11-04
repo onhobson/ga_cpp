@@ -36,10 +36,13 @@ int main()
     using Sequence = std::vector<int>;
 
     ga::Config config {
-        10,
-        30,
-        0,
-        0.7
+        .generationCount{ 100 },
+        .populationSize{ 20 },
+        .eliteCount{ 2 },
+        .tournamentSize{ 3 },
+        .crossoverRate{ 0.7 },
+        // .stagnationLimit{ 0 },
+        .callbackInterval{ 1 }
     };
 
     ga::GeneticAlgorithm<Sequence, int> ga { 

@@ -41,14 +41,14 @@ public:
     std::vector<Sequence> createRandomizedPopulation(const Sequence& baseSequence, Random& rng) const
     {
         std::vector<Sequence> population {};
-        population.reserve(m_config.populationSize());
+        population.reserve(m_config.populationSize);
 
         // Add given base sequence
         population.push_back( Sequence {baseSequence} );
         Sequence sequenceCopy { baseSequence };
 
         // Add random shuffles of sequence until population size is reached
-        while (population.size() < m_config.populationSize())
+        while (population.size() < m_config.populationSize)
         {
             std::shuffle(sequenceCopy.begin(), sequenceCopy.end(), rng.getEngine());
 
@@ -68,7 +68,7 @@ public:
     {
         Sequence newSequence;
 
-        if (rng.getReal(0.0, 1.0) < m_config.crossoverRate())
+        if (rng.getReal(0.0, 1.0) < m_config.crossoverRate)
         {
             newSequence = m_crossover(seq1, seq2, rng);
         }

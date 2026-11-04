@@ -19,7 +19,12 @@ protected:
     int crossoverCount = 0;
     int mutationCount = 0;
 
-    ga::Config config { 10, 10, 2, 0.0 };
+    ga::Config config {
+        .generationCount = 10,
+        .populationSize = 10,
+        .eliteCount = 2,
+        .crossoverRate = 0.0
+    };
     ga::Operators<Sequence> operators {
         ga::Crossover<Sequence> {
             [this](const Sequence& first, const Sequence&, ga::Random&)
@@ -71,7 +76,7 @@ TEST_F(GeneticAlgorithmTest, RunCallsEvaluationFunctionCorrectAmount)
     ga.run();
 
     // +1 because initial pop is evaluated once before run() loop
-    int expectedEvaluationCalls = config.populationSize() * (config.generationCount() + 1); 
+    int expectedEvaluationCalls = config.populationSize * (config.generationCount + 1); 
 
     EXPECT_EQ(evaluationCount, expectedEvaluationCalls); 
 }
@@ -87,7 +92,7 @@ TEST_F(GeneticAlgorithmTest, RunCallsOperatorFunctionCorrectAmount)
 
     ga.run();
 
-    int expectedOperatorCalls = config.generationCount() * (config.populationSize() - config.eliteCount());
+    int expectedOperatorCalls = config.generationCount * (config.populationSize - config.eliteCount);
 
     EXPECT_EQ(crossoverCount, 0);
     EXPECT_EQ(mutationCount, expectedOperatorCalls);
@@ -104,7 +109,7 @@ TEST_F(GeneticAlgorithmTest, RunCallsCallbackFunctionCorrectAmount)
 
     ga.run(cb);
 
-    EXPECT_EQ(cb.callbackCount, config.generationCount());
+    EXPECT_EQ(cb.callbackCount, config.generationCount);
 }
 
 TEST_F(GeneticAlgorithmTest, RunReturnsTopChromosome)
@@ -123,7 +128,7 @@ TEST_F(GeneticAlgorithmTest, RunReturnsTopChromosome)
     
     for (const std::size_t eliteCount : { 0, 1 } )
     {
-        config.eliteCount(eliteCount);
+        config.eliteCount = eliteCount;
 
         ga::GeneticAlgorithm<Sequence, int> ga {
             baseSequence,
@@ -149,7 +154,7 @@ TEST_F(GeneticAlgorithmTest, CarriesElitesBetweenGenerations)
     for (const std::size_t eliteCount : { 1, 3 })
     {
         SCOPED_TRACE("eliteCount=" + std::to_string(eliteCount));
-        config.eliteCount(eliteCount);
+        config.eliteCount = eliteCount;
 
         // Remember top chromosomes from prev generation
         std::vector<Chromosome> prevTop;
@@ -196,7 +201,7 @@ TEST_F(GeneticAlgorithmTest, CarriesElitesBetweenGenerations)
         const Chromosome result = ga.run(
             [this, &prevTop, eliteCount] (const std::vector<Chromosome>& population, const Chromosome& elite)
             {
-                ASSERT_EQ(population.size(), config.populationSize());
+                ASSERT_EQ(population.size(), config.populationSize);
 
                 if (prevTop.empty()) // First iteration
                 {
@@ -231,7 +236,7 @@ TEST_F(GeneticAlgorithmTest, CarriesElitesBetweenGenerations)
 
 TEST_F(GeneticAlgorithmTest, ZeroEliteCountDoesntCarry)
 {
-    config.eliteCount(0);
+    config.eliteCount = 0;
     baseSequence = { 10 };
 
     operators.mutate = {{

@@ -1,74 +1,158 @@
 #include "ga/core/config.hpp"
+#include "ga/core/genetic_algorithm.hpp"
+#include "ga/operations/functions/bundles.hpp"
 
 #include <gtest/gtest.h>
 
-
-class ConfigTest : public testing::Test
+// Contains shared resources for constructing GeneticAlgorithm object
+class ConfigValidationTest : public testing::Test
 {
 protected:
-    ga::Config config { 10, 20, 5, 0.5 };
+    static std::vector<int> baseSequence;
+    static std::function<int(const std::vector<int>&)> evalFunc;
+    static ga::Operators<std::vector<int>> operators;
 };
 
-
-TEST_F(ConfigTest, GenerationCountCanBeSetAndRetrieved)
+std::vector<int> baseSequence { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+std::function<int(const std::vector<int>&)> evalFunc = [](const std::vector<int>& seq) 
 {
-    config.generationCount(25);
+    return seq.front();
+};
+ga::Operators<std::vector<int>> operators { ga::prebuilt::permutationOperators<std::vector<int>>() };
 
-    EXPECT_EQ(config.generationCount(), 25);
+
+TEST(ConfigValidationTest, GenerationCountOfZeroThrows)
+{
+    ga::Config config {
+        .generationCount { 0 }
+    };
+
+    EXPECT_THROW(
+        (ga::GeneticAlgorithm { baseSequence, evalFunc, operators, config }),
+        std::invalid_argument
+    );
 }
 
-TEST_F(ConfigTest, GenerationCountRejectsZero)
+TEST(ConfigValidationTest, ValidGenerationCountDoesNotThrow)
 {
-    EXPECT_THROW(config.generationCount(0), std::invalid_argument);
+    ga::Config config {
+        .generationCount { 100 }
+    };
+
+    EXPECT_NO_THROW(
+        (ga::GeneticAlgorithm { baseSequence, evalFunc, operators, config })
+    );
 }
 
-TEST_F(ConfigTest, PopulationSizeCanBeSetAndRetrieved)
+TEST(ConfigValidationTest, PopulationSizeOfZeroThrows)
 {
-    config.populationSize(30);
+    ga::Config config {
+        .populationSize { 0 }
+    };
 
-    EXPECT_EQ(config.populationSize(), 30);
+    EXPECT_THROW(
+        (ga::GeneticAlgorithm { baseSequence, evalFunc, operators, config }),
+        std::invalid_argument
+    );
 }
 
-TEST_F(ConfigTest, PopulationSizeRejectsZero)
+TEST(ConfigValidationTest, ValidPopulationSizeDoesNotThrow)
 {
-    EXPECT_THROW(config.populationSize(0), std::invalid_argument);
+    ga::Config config {
+        .populationSize { 10 },
+        .eliteCount { 5 },
+        .tournamentSize { 3 }
+    };
+
+    EXPECT_NO_THROW(
+        (ga::GeneticAlgorithm { baseSequence, evalFunc, operators, config })
+    );
+    
+    config.populationSize = 20;
+    config.eliteCount = 20;
+    config.tournamentSize = 20;
+
+    EXPECT_NO_THROW(
+        (ga::GeneticAlgorithm { baseSequence, evalFunc, operators, config })
+    );
 }
 
-TEST_F(ConfigTest, PopulationSizeRejectsValuesBelowEliteCount)
+TEST(ConfigValidationTest, PopulationSizeLessThanEliteCountThrows)
 {
-    EXPECT_THROW(config.populationSize(4), std::invalid_argument);
+    ga::Config config {
+        .populationSize { 10 },
+        .eliteCount { 11 }
+    };
+
+    EXPECT_THROW(
+        (ga::GeneticAlgorithm { baseSequence, evalFunc, operators, config }),
+        std::invalid_argument
+    );
 }
 
-TEST_F(ConfigTest, EliteCountCanBeSetAndRetrieved)
+TEST(ConfigValidationTest, PopulationSizeLessThanTournamentSizeThrows)
 {
-    config.eliteCount(10);
+    ga::Config config {
+        .populationSize { 10 },
+        .tournamentSize { 11 }
+    };
 
-    EXPECT_EQ(config.eliteCount(), 10);
+    EXPECT_THROW(
+        (ga::GeneticAlgorithm { baseSequence, evalFunc, operators, config }),
+        std::invalid_argument
+    );
 }
 
-TEST_F(ConfigTest, EliteCountRejectsValuesAbovePopulationSize)
+TEST(ConfigValidationTest, TournamentSizeOfZeroThrows)
 {
-    EXPECT_THROW(config.eliteCount(21), std::invalid_argument);
+    ga::Config config {
+        .tournamentSize { 0 }
+    };
+
+    EXPECT_THROW(
+        (ga::GeneticAlgorithm { baseSequence, evalFunc, operators, config }),
+        std::invalid_argument
+    );
 }
 
-TEST_F(ConfigTest, CrossoverRateCanBeSetAndRetrieved)
+TEST(ConfigValidationTest, CrossoverRateOutsideOfBoundsThrows)
 {
-    config.crossoverRate(0.75);
+    ga::Config config {
+        .crossoverRate { -1.0 }
+    };
 
-    EXPECT_DOUBLE_EQ(config.crossoverRate(), 0.75);
+    EXPECT_THROW(
+        (ga::GeneticAlgorithm { baseSequence, evalFunc, operators, config }),
+        std::invalid_argument
+    );
+
+    config.crossoverRate = 1.01;
+    
+    EXPECT_THROW(
+        (ga::GeneticAlgorithm { baseSequence, evalFunc, operators, config }),
+        std::invalid_argument
+    );
 }
 
-TEST_F(ConfigTest, CrossoverRateAcceptsBoundaryValues)
+TEST(ConfigValidationTest, CrossoverRateInsideOfBoundsDoesNotThrow)
 {
-    config.crossoverRate(0.0);
-    EXPECT_DOUBLE_EQ(config.crossoverRate(), 0.0);
+    ga::Config config {
+        .crossoverRate { 0.0 }
+    };
 
-    config.crossoverRate(1.0);
-    EXPECT_DOUBLE_EQ(config.crossoverRate(), 1.0);
-}
+    EXPECT_NO_THROW(
+        (ga::GeneticAlgorithm { baseSequence, evalFunc, operators, config })
+    );
+    
+    config.crossoverRate = 1.0;
 
-TEST_F(ConfigTest, CrossoverRateRejectsValuesOutsideZeroToOne)
-{
-    EXPECT_THROW(config.crossoverRate(-0.01), std::invalid_argument);
-    EXPECT_THROW(config.crossoverRate(1.01), std::invalid_argument);
+    EXPECT_NO_THROW(
+        (ga::GeneticAlgorithm { baseSequence, evalFunc, operators, config })
+    );
+    
+    config.crossoverRate = 0.5;
+
+    EXPECT_NO_THROW(
+        (ga::GeneticAlgorithm { baseSequence, evalFunc, operators, config })
+    );
 }

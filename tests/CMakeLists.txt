@@ -54,6 +54,6 @@ package_add_test(core
     core/populator_test.cpp
     core/evaluator_test.cpp
     core/config_test.cpp
+    core/config_effects_test.cpp
     core/genetic_algorithm_test.cpp
-    core/genetic_algorithm_config_test.cpp
 )

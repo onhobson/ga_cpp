@@ -6,7 +6,7 @@
 #include <vector>
 
 
-class CrossoverSinglePointTest : public testing::Test
+class SinglePointTest : public testing::Test
 {
 protected:
     ga::Random rng { ga::Random::generateMtEngine() };
@@ -16,19 +16,19 @@ protected:
     std::vector<int> returnSequence { ga::functions::crossover::singlePoint(sampleSequence1, sampleSequence2, rng) };
 };
 
-TEST_F(CrossoverSinglePointTest, SinglePointChangesSequence)
+TEST_F(SinglePointTest, SinglePointChangesSequence)
 {
     EXPECT_NE(sampleSequence1, returnSequence);
     EXPECT_NE(sampleSequence2, returnSequence);
 }
 
-TEST_F(CrossoverSinglePointTest, SinglePointKeepsSameSize)
+TEST_F(SinglePointTest, SinglePointKeepsSameSize)
 {
     EXPECT_EQ(sampleSequence1.size(), returnSequence.size());
     EXPECT_EQ(sampleSequence2.size(), returnSequence.size());
 }
 
-TEST_F(CrossoverSinglePointTest, SinglePointChangesAtLeastOneElement)
+TEST_F(SinglePointTest, SinglePointChangesAtLeastOneElement)
 {
     int diffCount {};
     

@@ -32,15 +32,22 @@ package_add_test(operations
     operations/crossover_test.cpp
 )
 
-package_add_test(operation_functions
-    operations/functions/crossover_test.cpp
-    operations/functions/crossover/alternating_edge_test.cpp
-    operations/functions/crossover/order_test.cpp
-    operations/functions/crossover/edge_recombination_test.cpp
-    operations/functions/mutate/insert_test.cpp
-    operations/functions/mutate/inversion_test.cpp
-    operations/functions/mutate/scramble_test.cpp
-    operations/functions/mutate/swap_test.cpp
+package_add_test(crossover_misc_functions
+    operations/functions/crossover/misc/single_point_test.cpp
+)
+
+
+package_add_test(crossover_permutation_functions
+    operations/functions/crossover/permutation/alternating_edge_test.cpp
+    operations/functions/crossover/permutation/order_test.cpp
+    operations/functions/crossover/permutation/edge_recombination_test.cpp
+)
+
+package_add_test(mutate_permutation_functions
+    operations/functions/mutate/permutation/insert_test.cpp
+    operations/functions/mutate/permutation/inversion_test.cpp
+    operations/functions/mutate/permutation/scramble_test.cpp
+    operations/functions/mutate/permutation/swap_test.cpp
 )
 
 package_add_test(core

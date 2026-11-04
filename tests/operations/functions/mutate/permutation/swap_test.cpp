@@ -81,7 +81,6 @@ TEST(SwapMutationTest, WorksWithDifferentContainerTypes)
     std::array<int, 16> arr;
     std::ranges::iota(arr, 0);
     std::string str { "BIGol'String" };
-    std::cout << "\n\n\nHERE\n\n\n";
 
     outputsPermutation<std::array<int, 16>>(arr, ga::functions::mutate::swap<std::array<int, 16>>);
     outputsPermutation<std::string>(str, ga::functions::mutate::swap<std::string>);
@@ -92,24 +91,9 @@ TEST(SwapMutationTest, InvalidInputThrows)
     ga::Random rng { ga::Random::generateMtEngine() };
 
     std::vector<int> parent {};
+    EXPECT_THROW(ga::functions::mutate::swap(parent, rng), std::invalid_argument);
 
-
-    try
-    {
-        ga::functions::mutate::swap(parent, rng);
-    }
-    catch (const std::invalid_argument&)
-    {
-        SUCCEED();
-        return;
-    }
-
-    FAIL() << "Expected std::invalid_argument";
-
-
-    // EXPECT_THROW(ga::functions::mutate::swap(parent, rng), std::invalid_argument);
-
-    // // parent.push_back(1);
-    // // EXPECT_THROW(ga::functions::mutate::swap(parent, rng), std::invalid_argument);
+    parent.push_back(1);
+    EXPECT_THROW(ga::functions::mutate::swap(parent, rng), std::invalid_argument);
 }
 

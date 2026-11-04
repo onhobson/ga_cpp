@@ -109,7 +109,12 @@ public:
             const std::vector<Chromosome>& currentPopulation = m_currentPopulation;
             const Chromosome& bestSolution = m_bestSolution;
 
-            std::invoke(callback, currentPopulation, bestSolution);
+            // Call callback if interval not set to 0 and interval reached
+            if (m_config.callbackInterval && ++m_sinceLastCallback >= m_config.callbackInterval)
+            {
+                std::invoke(callback, currentPopulation, bestSolution);
+                m_sinceLastCallback = 0;
+            }
         }
 
         
@@ -131,7 +136,6 @@ public:
 
 private:
     const Sequence m_baseSequence {};
-    std::function<Fitness(Sequence)> m_evaluationFunction {};
 
     std::vector<Chromosome> m_currentPopulation {};
 
@@ -140,6 +144,8 @@ private:
 
     // Stores best solution found during evaluation.
     Chromosome m_bestSolution;
+
+    int m_sinceLastCallback { 0 };
 
     const Config m_config;
     const detail::Populator<Sequence> m_populator;

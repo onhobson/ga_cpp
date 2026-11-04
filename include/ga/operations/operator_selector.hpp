@@ -1,7 +1,7 @@
 #ifndef GA_OPERATOR_SELECTOR_HPP
 #define GA_OPERATOR_SELECTOR_HPP
 
-#include "../common/random.hpp"
+#include "ga/common/random.hpp"
 
 #include <algorithm>
 #include <format>

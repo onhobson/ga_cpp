@@ -8,4 +8,6 @@
 
 #include "operations/functions/mutate/permutation.hpp"
 
+#include "operations/functions/bundles.hpp"
+
 #endif  

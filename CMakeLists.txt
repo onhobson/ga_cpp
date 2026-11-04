@@ -12,12 +12,14 @@ target_include_directories(ga
 target_compile_features(ga INTERFACE cxx_std_23)
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-    option(PACKAGE_TESTS "Build the tests" ON)
+    option(BUILD_TESTS "Build the tests" ON)
 else()
-    option(PACKAGE_TESTS "Build the tests" OFF)
+    option(BUILD_TESTS "Build the tests" OFF)
 endif()
 
-if(PACKAGE_TESTS)
+option(BUILD_EXAMPLES "Build examples" ON)
+
+if(BUILD_TESTS)
     enable_testing()
     
     include(FetchContent)
@@ -30,4 +32,8 @@ if(PACKAGE_TESTS)
     FetchContent_MakeAvailable(googletest)
 
     add_subdirectory(tests)
+endif()
+
+if(BUILD_EXAMPLES)
+    add_subdirectory(examples)
 endif()

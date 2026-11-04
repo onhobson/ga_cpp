@@ -1,8 +1,8 @@
 #ifndef GA_OPERATORS_HPP
 #define GA_OPERATORS_HPP
 
-#include "crossover.hpp"
-#include "mutate.hpp"
+#include "ga/operations/crossover.hpp"
+#include "ga/operations/mutate.hpp"
 
 #include <vector>
 #include <random>

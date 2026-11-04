@@ -1,9 +1,9 @@
 #ifndef GA_MUTATE_HPP
 #define GA_MUTATE_HPP
 
-#include "../common/random.hpp"
+#include "ga/common/random.hpp"
 
-#include "operator_selector.hpp"
+#include "ga/operations/operator_selector.hpp"
 
 #include <functional>
 #include <vector>

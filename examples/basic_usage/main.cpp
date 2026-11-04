@@ -24,10 +24,9 @@ struct Callback
 
     void operator()(auto population, auto elite)
     {
-        // ++callCount;
+        ++callCount;
         // std::cout << callCount << ' ' << population.size() << '\n';
         // topFitProgression.push_back(elite.fitness);
-        elite.fitness = 0;
     }
 };
 
@@ -36,26 +35,17 @@ int main()
 {   
     using Sequence = std::vector<int>;
 
-    ga::Operators<Sequence> ops {
-        ga::Crossover<Sequence> {
-            ga::functions::Crossover::singlePoint<Sequence>
-        },
-        ga::Mutate<Sequence> {
-            ga::functions::Mutate::swap<Sequence>
-        }
-    };
-
     ga::Config config {
         10,
         30,
-        3,
+        0,
         0.7
     };
 
     ga::GeneticAlgorithm<Sequence, int> ga { 
         {81, 83, 14, 64, 33, 10, 27, 51, 61, 23},
         evaluationFunction,
-        ops,
+        ga::prebuilt::permutationOperators<Sequence>(),
         config
     };
 
@@ -63,7 +53,7 @@ int main()
     std::cout << "\nRUNNING\n";
 
     Callback cb {};
-    ga::Chromosome elite { ga.run() };
+    ga::Chromosome elite { ga.run(cb) };
 
     for (auto n : cb.topFitProgression)
         std::cout << n << ", ";

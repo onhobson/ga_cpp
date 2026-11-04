@@ -1,7 +1,7 @@
 #ifndef GA_EVALUATOR_HPP
 #define GA_EVALUATOR_HPP
 
-#include "chromosome.hpp"
+#include "ga/core/chromosome.hpp"
 
 #include <concepts>
 #include <functional>

@@ -1,12 +1,12 @@
 #ifndef GA_POPULATOR_HPP
 #define GA_POPULATOR_HPP
 
-#include "../common/random.hpp"
+#include "ga/common/random.hpp"
 
-#include "config.hpp"
+#include "ga/core/config.hpp"
 
-#include "../operations/crossover.hpp"
-#include "../operations/mutate.hpp"
+#include "ga/operations/crossover.hpp"
+#include "ga/operations/mutate.hpp"
 
 #include <algorithm>
 #include <vector>

@@ -1,9 +1,9 @@
 #ifndef GA_CROSSOVER_HPP
 #define GA_CROSSOVER_HPP
 
-#include "../common/random.hpp"
+#include "ga/common/random.hpp"
 
-#include "operator_selector.hpp"
+#include "ga/operations/operator_selector.hpp"
 
 #include <functional>
 #include <vector>

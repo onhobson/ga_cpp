@@ -1,16 +1,16 @@
 #ifndef GA_GENETIC_ALGORITHM_HPP
 #define GA_GENETIC_ALGORITHM_HPP
 
-#include "../common/random.hpp"
+#include "ga/common/random.hpp"
 
-#include "chromosome.hpp"
-#include "config.hpp"
-#include "evaluator.hpp"
-#include "populator.hpp"
+#include "ga/core/chromosome.hpp"
+#include "ga/core/config.hpp"
+#include "ga/core/evaluator.hpp"
+#include "ga/core/populator.hpp"
 
-#include "../operations/crossover.hpp"
-#include "../operations/operators.hpp"
-#include "../operations/mutate.hpp"
+#include "ga/operations/crossover.hpp"
+#include "ga/operations/operators.hpp"
+#include "ga/operations/mutate.hpp"
 
 #include <algorithm>
 #include <cstdlib>

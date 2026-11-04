@@ -1,8 +1,7 @@
 #ifndef GA_CONSTRAINTS_HPP
 #define GA_CONSTRAINTS_HPP
 
-#include "random.hpp"
-#include "hash.hpp"
+#include "ga/common/hash.hpp"
 
 #include <concepts>
 #include <ranges>

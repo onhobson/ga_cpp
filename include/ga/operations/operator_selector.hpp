@@ -22,19 +22,19 @@ template <typename Operation>
 class OperatorSelector
 {
 protected:
-    /**
-     * @brief Construct a new Operator Selector object with a single operation, automatically assigned a weight of 1.0.
-     */
-    OperatorSelector(
-        Operation operation
-    ) : OperatorSelector(
-        std::vector<Operation> { operation },
-        std::vector<double> { 1.0 }
-    ) { }
+    OperatorSelector() = default;
 
-    /**
-     * @brief Construct a new Operator Selector object with a vector of operations and a vector of associated weights.
-     */
+    /// @brief Construct a new OperatorSelector with given operations, assigned equal weights 
+    OperatorSelector(
+        std::vector<Operation> operations
+    ) 
+        : OperatorSelector(
+            operations,
+            std::vector<double> (operations.size(), 1.0)
+        )
+    { }
+
+    /// @brief Construct a new OperatorSelector object with a vector of operations and a vector of associated weights. 
     OperatorSelector(
         std::vector<Operation> operations,
         std::vector<double> weights
@@ -78,6 +78,9 @@ protected:
      */
     Operation getOperation(Random& rng) const
     {
+        if (m_weightedOperators.empty())
+            throw std::invalid_argument("No operations available for selection");
+            
         // Select operator based on predefined weights
         double randomNum { rng.getReal(0.0, m_weightedOperators.back().weight) };
 

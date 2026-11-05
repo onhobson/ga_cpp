@@ -4,9 +4,6 @@
 #include "ga/operations/crossover.hpp"
 #include "ga/operations/mutate.hpp"
 
-#include <vector>
-#include <random>
-
 namespace ga
 {
 

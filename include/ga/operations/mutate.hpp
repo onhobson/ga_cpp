@@ -28,14 +28,26 @@ class Mutate: public detail::OperatorSelector<std::function<Sequence(const Seque
     using MutateOperation = std::function<Sequence(const Sequence&, Random&)>;
 
 public:
+    Mutate() = default;
+    
     /**
      * @brief Construct a Mutate with one mutation operation, assigned a weight of 1.0.
      * 
      * @param operation The mutation operation to use.
      */
     Mutate(MutateOperation operation) 
-        : detail::OperatorSelector<MutateOperation> { operation }
+        : Mutate { { operation }, { 1.0 }}
     { }
+
+    /**
+     * @brief Construct a Mutate with a vector of mutation operations. Assigns equal weights to the operators.
+     * 
+     * @param operations Candidate mutation operations.
+     */
+    Mutate(std::vector<MutateOperation> operations)
+        : detail::OperatorSelector<MutateOperation> { operations }
+    { }
+
 
     /**
      * @brief Construct a new Mutate object with a vector of mutation operations and a vector of associated weights.
@@ -51,8 +63,7 @@ public:
      * @brief Applies a randomly selected mutation operation using the given `Sequence`.
      * 
      * @param seq The parent `Sequence`.
-     * @param rng The `ga::Random` random number generator to use for selecting the mutation operation.
-     * @see ga::Random
+     * @param rng The `ga::Random` random number generator to use for selecting the mutation operation. 
      * 
      * @return The `Sequence` produced by the mutation operation. 
      */

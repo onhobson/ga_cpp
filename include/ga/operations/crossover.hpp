@@ -28,6 +28,8 @@ class Crossover: public detail::OperatorSelector<std::function<Sequence(const Se
     using CrossoverOperation = std::function<Sequence(const Sequence&, const Sequence&, Random&)>;
 
 public:
+    Crossover() = default;
+
     /**
      * @brief Constructs a Crossover with one crossover operation, assigned a weight of 1.0.
      * 
@@ -35,6 +37,15 @@ public:
      */
     Crossover(CrossoverOperation operation) 
         : Crossover { std::vector<CrossoverOperation> { operation }, std::vector<double> { 1.0 } }
+    { }
+
+    /**
+     * @brief Construct a Crossover with a vector of crossover operations. Assigns equal weights to the operators.
+     * 
+     * @param operations Candidate crossover operations.
+     */
+    Crossover(std::vector<CrossoverOperation> operations)
+        : detail::OperatorSelector<CrossoverOperation> { operations }
     { }
 
     /**

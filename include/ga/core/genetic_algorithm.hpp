@@ -7,6 +7,7 @@
 #include "ga/core/config.hpp"
 #include "ga/core/evaluator.hpp"
 #include "ga/core/populator.hpp"
+#include "ga/core/selector.hpp"
 
 #include "ga/operations/crossover.hpp"
 #include "ga/operations/operators.hpp"
@@ -68,6 +69,7 @@ public:
                 m_config
             )}
         , m_rng { Random(randomEngine) }
+        , m_selector { m_config.tournamentSize, m_rng }
     { 
         m_config.validate();
     } 
@@ -150,6 +152,7 @@ private:
     const Config m_config;
     const detail::Populator<Sequence> m_populator;
     const detail::Evaluator<Sequence, Fitness> m_evaluator;
+    detail::Selector<Sequence, Fitness> m_selector;
     Random m_rng {};
 
     // Initializes the population with randomized sequences and sets up the elite min-heap.
@@ -194,14 +197,18 @@ private:
         {
             std::size_t firstIndex { getRandomPopulationIndex() };
             std::size_t secondIndex { getRandomPopulationIndex(firstIndex) };
+
+            const auto [first, second] { m_selector.select(m_currentPopulation) };
             
-            newGeneration.push_back({
-                m_populator.createSequence(
-                    m_currentPopulation[firstIndex].sequence,
-                    m_currentPopulation[secondIndex].sequence,
-                    m_rng
-                ), 0
-            });
+            newGeneration.push_back( 
+                Chromosome {
+                    m_populator.createSequence(
+                        first.sequence,
+                        second.sequence,
+                        m_rng
+                    ), 0 
+                }
+            );
         }    
 
         m_currentPopulation = std::move(newGeneration);
@@ -222,6 +229,9 @@ private:
     // Selects the top-performing chromosomes from the current population and updates the elite min-heap.
     void selectElites()
     {
+        // Evaluation updates fitness through the pointers, which can invalidate the heap ordering.
+        std::ranges::make_heap(m_elites, std::ranges::greater{}, &Chromosome::fitness);
+
         // Start after elite carry-over section of population
         for (std::size_t i {m_config.eliteCount}; i < m_currentPopulation.size(); ++i)
         {

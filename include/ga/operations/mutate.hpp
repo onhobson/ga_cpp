@@ -29,7 +29,7 @@ class Mutate: public detail::OperatorSelector<std::function<Sequence(const Seque
 
 public:
     Mutate() = default;
-    
+
     /**
      * @brief Construct a Mutate with one mutation operation, assigned a weight of 1.0.
      * 

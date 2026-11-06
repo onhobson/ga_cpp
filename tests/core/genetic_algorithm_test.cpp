@@ -119,12 +119,12 @@ TEST_F(GeneticAlgorithmTest, RunReturnsTopChromosome)
 
     baseSequence = { 10 };
 
-    operators.mutate = {{
+    operators.mutate = {
         [](const Sequence& seq, ga::Random&)
         {
             return Sequence { seq.front() - 1 };
         }
-    }};
+    };
     
     for (const std::size_t eliteCount : { 0, 1 } )
     {
@@ -147,9 +147,41 @@ TEST_F(GeneticAlgorithmTest, RunReturnsTopChromosome)
 
 TEST_F(GeneticAlgorithmTest, CarriesElitesBetweenGenerations)
 {
-    operators.mutate = {{
+    operators.mutate = ga::Mutate<Sequence> {
         ga::functions::mutate::swap<Sequence>
-    }};
+    };
+
+    // Lehmer code to create unique fitness for each sequence permutation
+    auto evalFunc = [](const Sequence& seq)
+    {
+        Sequence tmp { seq };
+        std::ranges::sort(tmp);
+
+        int n = static_cast<int>(seq.size());
+        int fitness = 0;
+
+        auto factorial = [](int n)
+        {
+            int result = 1;
+            for (int i = 1; i <= n; ++i)
+            {
+                result *= i;
+            }
+            return result;
+        };
+
+        for (std::size_t i = 0; i < seq.size(); ++i)
+        {
+            auto it = std::ranges::find(tmp, seq[i]);
+            int rank = it - tmp.begin();
+
+            tmp.erase(it);
+
+            fitness += rank * factorial(n - 1 - i);
+        }
+
+        return fitness;
+    };
 
     for (const std::size_t eliteCount : { 1, 3 })
     {
@@ -158,38 +190,6 @@ TEST_F(GeneticAlgorithmTest, CarriesElitesBetweenGenerations)
 
         // Remember top chromosomes from prev generation
         std::vector<Chromosome> prevTop;
-
-        // Lehmer code to create unique fitness for each sequence permutation
-        auto evalFunc = [](const Sequence& seq)
-        {
-            Sequence tmp { seq };
-            std::ranges::sort(tmp);
-
-            int n = static_cast<int>(seq.size());
-            int fitness = 0;
-
-            auto factorial = [](int n)
-            {
-                int result = 1;
-                for (int i = 1; i <= n; ++i)
-                {
-                    result *= i;
-                }
-                return result;
-            };
-
-            for (std::size_t i = 0; i < seq.size(); ++i)
-            {
-                auto it = std::ranges::find(tmp, seq[i]);
-                int rank = it - tmp.begin();
-
-                tmp.erase(it);
-
-                fitness += rank * factorial(n - 1 - i);
-            }
-
-            return fitness;
-        };
 
         ga::GeneticAlgorithm<Sequence, int> ga {
             baseSequence,
@@ -221,8 +221,8 @@ TEST_F(GeneticAlgorithmTest, CarriesElitesBetweenGenerations)
                 ASSERT_EQ(elites.size(), prevTop.size());
                 for (std::size_t i = 0; i < eliteCount; ++i)
                 {
-                    EXPECT_EQ(elites[i].sequence, prevTop[i].sequence);
-                    EXPECT_EQ(elites[i].fitness, prevTop[i].fitness);
+                    EXPECT_EQ(elites[i].sequence, prevTop[i].sequence) << "elite index: " << i;
+                    EXPECT_EQ(elites[i].fitness, prevTop[i].fitness) << "elite index: " << i;
                 }
 
                 // Update prevTop
@@ -239,12 +239,12 @@ TEST_F(GeneticAlgorithmTest, ZeroEliteCountDoesntCarry)
     config.eliteCount = 0;
     baseSequence = { 10 };
 
-    operators.mutate = {{
+    operators.mutate = {
         [](const Sequence& seq, ga::Random&)
         {
             return Sequence { seq.front() - 1 };
         }
-    }};
+    };
     
     ga::GeneticAlgorithm<Sequence, int> ga {
         baseSequence,

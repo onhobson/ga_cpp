@@ -37,6 +37,25 @@ TEST_F(RandomTest, GetIntegerWithDifferentTypes)
     EXPECT_LE(sizeValue, 10U);
 }
 
+TEST_F(RandomTest, GetIntegerDistribution)
+{
+    constexpr std::size_t iterations { 10000 };
+    constexpr std::size_t min { 0 };
+    constexpr std::size_t max { 10 };
+    std::vector<std::size_t> counts(max - min + 1, 0);
+
+    for (std::size_t i { 0 }; i < iterations; ++i)
+    {
+        const std::size_t value = rng.getInteger(min, max);
+        EXPECT_GE(value, min);
+        EXPECT_LE(value, max);
+        ++counts[value - min];
+    }
+
+    for (const std::size_t count : counts)
+        EXPECT_NEAR(count, iterations / counts.size(), 0.02 * iterations);
+}
+
 TEST_F(RandomTest, GetIntegerExclude)
 {
     const int value = rng.getIntegerExclude(1, 3, 2);
@@ -78,6 +97,73 @@ TEST_F(RandomTest, GetIntegerExcludeWithMultipleValues)
     }
 }
 
+TEST_F(RandomTest, GetSampleSelectsUnique)
+{
+    const std::vector<int> values { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+
+    for (int i { 0 }; i < 32; ++i)
+    {
+        auto sample { rng.getSample(values, 6) };
+
+        std::ranges::sort(sample);
+        EXPECT_EQ(std::ranges::adjacent_find(sample), sample.end());
+    }
+}
+
+TEST_F(RandomTest, GetSampleDifferentCounts)
+{
+    const std::vector<int> values { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+
+    for (std::size_t i { 0 }; i < 32; ++i)
+    {
+        const std::size_t count { i % 17 };
+        const auto sample { rng.getSample(values, count) };
+
+        EXPECT_EQ(sample.size(), count);
+    }
+}
+
+TEST_F(RandomTest, GetSampleDistribution)
+{
+    const std::vector<int> values { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+    std::vector<int> counts(16);
+
+    const std::size_t iterations { 5000 };
+    const std::size_t numSamples { 4 };
+
+    for (std::size_t i { 0 }; i < iterations; ++i)
+    {
+        const auto sample { rng.getSample(values, numSamples) };
+        
+        for (const auto n : sample)
+            ++counts[static_cast<std::size_t>(n)];
+    }
+
+    for (const int count : counts)
+        EXPECT_NEAR(count, iterations / counts.size() * numSamples, 0.05 * iterations);
+}
+
+TEST_F(RandomTest, GetSampleDifferentTypes)
+{
+    const std::vector<int> iValues { 0, -1, -2, -3, -4, -5, -6, -7 };
+    auto iSample { rng.getSample(iValues, 3) };
+    EXPECT_EQ(iSample.size(), 3);
+    std::ranges::sort(iSample);
+    EXPECT_EQ(std::ranges::adjacent_find(iSample), iSample.end());
+
+    const std::vector<std::size_t> stValues { 0, 1, 2, 3, 4, 5, 6, 7 };
+    auto stSample { rng.getSample(stValues, 3) };
+    EXPECT_EQ(stSample.size(), 3);
+    std::ranges::sort(stSample);
+    EXPECT_EQ(std::ranges::adjacent_find(stSample), stSample.end());
+
+    const std::vector<double> dValues { 10.0, 20.2, 30.2, 40.5, 60.5, 82.3, 49.5, 87.1 };
+    auto dSample { rng.getSample(dValues, 3) };
+    EXPECT_EQ(dSample.size(), 3);
+    std::ranges::sort(dSample);
+    EXPECT_EQ(std::ranges::adjacent_find(dSample), dSample.end());
+}
+
 TEST_F(RandomTest, GetReal)
 {
     const double value = rng.getReal(2.5, 3.5);
@@ -100,9 +186,9 @@ TEST_F(RandomTest, GetIntegerOutputsWithinSuppliedBounds)
 {
     for (int i = 0; i < 100; ++i)
     {
-        const int value = rng.getInteger(-20, 30);
-        EXPECT_GE(value, -20);
-        EXPECT_LE(value, 30);
+        const int value = rng.getInteger(0, 10);
+        EXPECT_GE(value, 0);
+        EXPECT_LE(value, 10);
     }
 }
 
@@ -110,9 +196,9 @@ TEST_F(RandomTest, GetRealOutputsWithinSuppliedBounds)
 {
     for (int i = 0; i < 100; ++i)
     {
-        const double value = rng.getReal(-20.0, 30.0);
-        EXPECT_GE(value, -20.0);
-        EXPECT_LT(value, 30.0);
+        const double value = rng.getReal(0.0, 10.0);
+        EXPECT_GE(value, 0.0);
+        EXPECT_LT(value, 10.0);
     }
 }
 

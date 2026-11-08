@@ -13,79 +13,51 @@ class PopulatorTest : public testing::Test
 {
 protected:
     int crossoverCount = 0;
-    ga::Config config {
-        .generationCount = 10,
-        .populationSize = 10,
-        .eliteCount = 2,
-        .crossoverRate = 0.7
-    };
+
     ga::Random rng { ga::Random::generateMtEngine() };
 
     ga::Crossover<Sequence> crossover;
     ga::Mutate<Sequence> mutate;
-    ga::detail::Populator<Sequence> populator;
 
-
-    PopulatorTest()
-        : crossover { [this](const Sequence& seq1 , const Sequence& seq2, ga::Random& rng)
-            {
-                ++crossoverCount;
-                return Sequence { seq1.front(), seq2.front() };
-            }}
-        , mutate { [this](const Sequence& seq, ga::Random& rng)
-            {
-                return Sequence { 1 };
-            }}
-        , populator { crossover, mutate, config }
-    { }
-};
-
-
-TEST_F(PopulatorTest, CreateRandomizedPopulationReturnsCorrectSize)
-{
-    Sequence baseSequence { 1, 2, 3, 4, 5 };
-
-    std::vector<Sequence> population { populator.createRandomizedPopulation(baseSequence, rng) };
-
-    EXPECT_EQ(baseSequence.size(), population.front().size());
-}
-
-TEST_F(PopulatorTest, CreateRandomizedPopulationReturnsCorrectAmount)
-{
-    Sequence baseSequence { 1, 2, 3, 4, 5 };
-
-    std::vector<Sequence> population { populator.createRandomizedPopulation(baseSequence, rng) };
-
-    EXPECT_EQ(population.size(), config.populationSize);
-}
-
-TEST_F(PopulatorTest, CreateRandomizedPopulationReturnsShuffledSequences)
-{
-    Sequence baseSequence { 1, 2, 3, 4, 5 };
-
-    std::vector<Sequence> population { populator.createRandomizedPopulation(baseSequence, rng) };
-
-    for (Sequence seq : population)
+    Sequence crossoverFunc(const Sequence& seq1, const Sequence& seq2, ga::Random& rng)
     {
-        std::sort(seq.begin(), seq.end());
-
-        EXPECT_EQ(seq, baseSequence);
+        ++crossoverCount;
+        return Sequence { seq1.front(), seq2.front() };
     }
-}
+    
+    Sequence mutateFunc(const Sequence& seq, ga::Random& rng)
+    {
+        return Sequence { 1 };
+    }
+};
 
 TEST_F(PopulatorTest, CreateSequenceFollowsCrossoverRate)
 {
     Sequence sequence1 { 1, 2, 3, 4, 5 };
     Sequence sequence2 { 6, 7, 8, 9, 10 };
 
-    // crossoverCount = 0;
-    // mutateCount = 0;
-
-    constexpr int sampleCount = 100000;
-    for (int i = 0; i < sampleCount; ++i)
+    for (double rate : { 0.0, 0.5, 0.75, 1.0 } )
     {
-        populator.createSequence(sequence1, sequence2, rng);
-    }
+        crossoverCount = 0;
 
-    EXPECT_NEAR(crossoverCount, sampleCount * config.crossoverRate, sampleCount * 0.05);
+        ga::detail::Populator<Sequence> populator {
+            {[this](const Sequence& seq1, const Sequence& seq2, ga::Random& rng)
+            {
+                return crossoverFunc(seq1, seq2, rng);
+            }},
+            {[this](const Sequence& seq, ga::Random& rng)
+            {
+                return mutateFunc(seq, rng);
+            }},
+            rate
+        };
+
+        constexpr int sampleCount = 100000;
+        for (int i = 0; i < sampleCount; ++i)
+        {
+            populator.createSequence(sequence1, sequence2, rng);
+        }
+
+        EXPECT_NEAR(crossoverCount, sampleCount * rate, sampleCount * 0.02);
+    }
 }

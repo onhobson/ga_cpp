@@ -1,7 +1,9 @@
 #ifndef GA_GENETIC_ALGORITHM_HPP
 #define GA_GENETIC_ALGORITHM_HPP
 
+#include "ga/common/constraints.hpp"
 #include "ga/common/random.hpp"
+#include "ga/common/initializers.hpp"
 
 #include "ga/core/chromosome.hpp"
 #include "ga/core/config.hpp"
@@ -22,6 +24,7 @@
 #include <functional>
 #include <queue>
 #include <random>
+#include <format>
 
 namespace ga
 {
@@ -46,30 +49,31 @@ public:
     /**
      * @brief Constructs a GeneticAlgorithm object with the given base sequence, evaluation function, operators, configuration, and random number generator engine.
      * 
-     * @param baseSequence The initial `Sequence` from which the population will be generated.
      * @param evaluationFunction A function that takes a `Sequence` and returns its `Fitness` value.
      * @param operators A `ga::Operators` struct containing the crossover and mutation operators to use.
      * @param config A `ga::Config` object specifying the parameters of the genetic algorithm.
      * @param randomEngine An optional random number generator engine to use. Defaults to a Mersenne Twister engine.
      */
     GeneticAlgorithm(
-        Sequence baseSequence,
         std::function<Fitness(const Sequence&)> evaluationFunction,
         Operators<Sequence> operators,
         Config config,
         URBG randomEngine = URBG ( std::move(Random::generateMtEngine()) )
     )
-        : m_baseSequence { baseSequence }
-        , m_evaluator { evaluationFunction }
+        : m_evaluator { evaluationFunction, config.eliteCount }
         , m_config { config }
         , m_populator { 
-            detail::Populator<Sequence>(
+            detail::Populator<Sequence> {
                 operators.crossover, 
                 operators.mutate,
-                m_config
-            )}
+                config.crossoverRate
+            }}
         , m_rng { Random(randomEngine) }
-        , m_selector { m_config.tournamentSize, m_rng }
+        , m_selector { 
+            detail::Selector<Sequence, Fitness> { 
+                m_config.tournamentSize, 
+                m_rng 
+            }}
     { 
         m_config.validate();
     } 
@@ -85,22 +89,47 @@ public:
     /**
      * @brief Runs the genetic algorithm for the number of generations specified in the `ga::Config` object, and returns the best `Chromosome` found.
      * 
+     * @param baseSequence The base sequence to use for initializing the population.
+     * @param initializationFunction An optional initialization function that generates the initial population from the given base sequence.
+     *                               Must be invocable with `const Sequence&`, `std::size_t`, and `ga::Random&`, and return a `std::vector<Sequence>`.
+     *                               Defaults to `ga::init::RandomPermutation<Sequence>`.
+     * @param callback An optional callback function that is invoked at the end of each generation with the current population and the current best solution.
+     *                 Must be invocable with `const std::vector<Chromosome>&` and `const Chromosome&`.
+     * 
+     * @return The best `Chromosome` found after running the genetic algorithm for the specified number of generations.
+     */
+    template <typename Initializer = init::RandomPermutation<Sequence>, typename Callback = NoOpCallback>
+    requires (constraints::CallbackFunction<Callback, Sequence, Fitness> &&
+              constraints::InitializationFunction<Initializer, Sequence>)
+    Chromosome run(
+        const Sequence& baseSequence,
+        Initializer&& initializationFunction = {},
+        Callback&& callback = {}
+    ) { 
+        return run(std::invoke(initializationFunction, baseSequence, m_config.populationSize, m_rng), std::forward<Callback>(callback));
+    }
+
+    /**
+     * @brief Runs the genetic algorithm for the number of generations specified in the `ga::Config` object, and returns the best `Chromosome` found.
+     * 
      * @param callback An optional callback function that is invoked at the end of each generation with the current population and the current best solution.
      *                 Must be invocable with `const std::vector<Chromosome>&` and `const Chromosome&`.
      * 
      * @return The best `Chromosome` found after running the genetic algorithm for the specified number of generations.
      */
     template <typename Callback = NoOpCallback>
-        requires std::invocable<
-            Callback&,                      // Fn
-            const std::vector<Chromosome>&, // Population
-            const Chromosome&               // Elite
-        >
-    Chromosome run(Callback&& callback = {})
+    requires (constraints::CallbackFunction<Callback, Sequence, Fitness>)
+    Chromosome run(const std::vector<Sequence>& population, Callback&& callback = {})
     {
-        initializePopulation();
+        if (population.size() != m_config.populationSize)
+            throw std::invalid_argument(std::format(
+                "Given population size was not equal to specified population size in Config object. {} vs {}", population.size(), m_config.populationSize
+            ));
+
+        initializePopulation(population);
         evaluateCurrentGeneration();
         
+        // Begin GA loop
         for (int i {0}; i < m_config.generationCount; ++i)
         {
             createNewGeneration();
@@ -117,65 +146,33 @@ public:
                 std::invoke(callback, currentPopulation, bestSolution);
                 m_sinceLastCallback = 0;
             }
-        }
+        } 
 
-        
         return m_bestSolution;
     }
 
-    void printCurrentGeneration() const
-    {        
-        for (const auto& chr : m_currentPopulation)
-        {
-            std::cout << "Fitness: " << chr.fitness << ", Seq: [ ";
-
-            for (const auto& gene : chr.sequence)
-                std::cout << gene << ' ';
-
-            std::cout << "]\n";
-        }
-    }
-
 private:
-    const Sequence m_baseSequence {};
-
     std::vector<Chromosome> m_currentPopulation {};
 
-    // Min-heap
-    std::vector<Chromosome*> m_elites;
-
     // Stores best solution found during evaluation.
-    Chromosome m_bestSolution;
+    Chromosome m_bestSolution {};
 
     int m_sinceLastCallback { 0 };
 
     const Config m_config;
     const detail::Populator<Sequence> m_populator;
-    const detail::Evaluator<Sequence, Fitness> m_evaluator;
+    detail::Evaluator<Sequence, Fitness> m_evaluator;
     detail::Selector<Sequence, Fitness> m_selector;
     Random m_rng {};
 
-    // Initializes the population with randomized sequences and sets up the elite min-heap.
-    void initializePopulation()
+    // Constructs Chromosomes out of each member in population with default Fitness
+    void initializePopulation(const std::vector<Sequence>& population)
     {
-        m_currentPopulation.reserve(m_config.populationSize);
-        
-        std::vector<Sequence> randomizedSequences { m_populator.createRandomizedPopulation(m_baseSequence, m_rng) };
+        m_currentPopulation.clear();
+        m_currentPopulation.reserve(m_config.populationSize); 
 
-        for (std::size_t i {0}; i < randomizedSequences.size(); ++i)
-        {
-            m_currentPopulation.push_back({
-                std::move(randomizedSequences[i]), 0
-            });
-        }
-
-        // Initialize the elite min-heap with the front portion of the current population.
-        for (std::size_t i {0}; i < m_config.eliteCount; ++i)
-        {
-            m_elites.push_back(&m_currentPopulation[i]);
-        }
-
-        std::ranges::make_heap(m_elites, std::ranges::greater{}, &Chromosome::fitness);
+        for (const auto& sequence : population)
+            m_currentPopulation.emplace_back( Chromosome { .sequence = sequence } ); 
     }
 
     // Creates a new generation of chromosomes by preserving elites and generating offspring from the current population.
@@ -184,13 +181,9 @@ private:
         std::vector<Chromosome> newGeneration {};
         newGeneration.reserve(m_config.populationSize);
 
-        for (auto& elite : m_elites)
-        {
-            newGeneration.push_back(*elite);
-
-            // Ensure elite ptr remains valid in new generation
-            elite = &newGeneration.back();
-        }
+        // Carry over elites
+        for (std::size_t i { 0 }; i < m_config.eliteCount; ++i)
+            newGeneration.push_back(m_currentPopulation[i]);
 
         // Fill rest of population
         while (newGeneration.size() < m_config.populationSize)
@@ -217,35 +210,10 @@ private:
     // Evaluates the fitness of the current generation and updates the elite min-heap accordingly.
     void evaluateCurrentGeneration()
     {
-        std::size_t bestIndex { m_evaluator.evaluate(m_currentPopulation) };
+        m_evaluator.evaluate(m_currentPopulation);
 
-        if (m_currentPopulation[bestIndex].fitness > m_bestSolution.fitness)
-            m_bestSolution = m_currentPopulation[bestIndex];
-
-        if (m_config.eliteCount > 0)
-            selectElites();
-    }
-
-    // Selects the top-performing chromosomes from the current population and updates the elite min-heap.
-    void selectElites()
-    {
-        // Evaluation updates fitness through the pointers, which can invalidate the heap ordering.
-        std::ranges::make_heap(m_elites, std::ranges::greater{}, &Chromosome::fitness);
-
-        // Start after elite carry-over section of population
-        for (std::size_t i {m_config.eliteCount}; i < m_currentPopulation.size(); ++i)
-        {
-            // If current fitness is better than worst in min-heap m_elites
-            if (m_elites.front()->fitness < m_currentPopulation[i].fitness)
-            {
-                std::ranges::pop_heap(m_elites, std::ranges::greater{}, &Chromosome::fitness);
-                
-                // Push current pop into m_elites
-                m_elites.back() = &m_currentPopulation[i];
-
-                std::ranges::push_heap(m_elites, std::ranges::greater{}, &Chromosome::fitness);
-            }
-        }
+        if (m_currentPopulation.front().fitness > m_bestSolution.fitness)
+            m_bestSolution = m_currentPopulation.front();
     }
 
     std::size_t getRandomPopulationIndex(std::size_t omit = -1)
@@ -257,7 +225,7 @@ private:
 
 // Deduction Guide:
 template <typename Sequence, typename Fitness, typename URBG>
-GeneticAlgorithm(Sequence, std::function<Fitness(const Sequence&)>, Operators<Sequence>, Config, URBG) -> GeneticAlgorithm<Sequence, Fitness, URBG>;
+GeneticAlgorithm(std::function<Fitness(const Sequence&)>, Operators<Sequence>, Config, URBG) -> GeneticAlgorithm<Sequence, Fitness, URBG>;
 
 }
 

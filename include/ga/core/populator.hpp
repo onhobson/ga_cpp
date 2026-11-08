@@ -3,21 +3,15 @@
 
 #include "ga/common/random.hpp"
 
-#include "ga/core/config.hpp"
-
 #include "ga/operations/crossover.hpp"
 #include "ga/operations/mutate.hpp"
 
-#include <algorithm>
-#include <vector>
-
-#include <iostream>
 
 namespace ga::detail
 {
 
 /**
- * @brief A class that creates a population of sequences and generates new sequences based on crossover and mutation operations.
+ * @brief Provides access to and controls lifetimes of `Crossover` and `Mutate`.
  * 
  * @tparam Sequence The type that is used by the given crossover and mutation operators.
  */
@@ -28,35 +22,12 @@ public:
     Populator(
         const Crossover<Sequence>& crossover,
         const Mutate<Sequence>& mutate,
-        const Config& config
+        double crossoverRate
     )   
         : m_crossover { crossover }
         , m_mutate { mutate }
-        , m_config { config }
+        , m_crossoverRate { crossoverRate }
     { }
-
-    /**
-     * @brief Creates a randomized population of sequences based on the given base sequence.
-     */
-    std::vector<Sequence> createRandomizedPopulation(const Sequence& baseSequence, Random& rng) const
-    {
-        std::vector<Sequence> population {};
-        population.reserve(m_config.populationSize);
-
-        // Add given base sequence
-        population.push_back( Sequence {baseSequence} );
-        Sequence sequenceCopy { baseSequence };
-
-        // Add random shuffles of sequence until population size is reached
-        while (population.size() < m_config.populationSize)
-        {
-            std::shuffle(sequenceCopy.begin(), sequenceCopy.end(), rng.getEngine());
-
-            population.push_back(sequenceCopy);
-        }
-
-        return population;
-    }
 
     /**
      * @brief Creates a new sequence based on the given two parent sequences, using crossover and mutation operations.
@@ -68,7 +39,7 @@ public:
     {
         Sequence newSequence;
 
-        if (rng.getReal(0.0, 1.0) < m_config.crossoverRate)
+        if (rng.getReal(0.0, 1.0) < m_crossoverRate)
         {
             newSequence = m_crossover(seq1, seq2, rng);
         }
@@ -84,7 +55,7 @@ private:
     const Crossover<Sequence> m_crossover;
     const Mutate<Sequence> m_mutate;
 
-    const Config& m_config; ///< References the `ga::Config` object owned by the `ga::GeneticAlgorithm` object that created this `Populator`.
+    const double m_crossoverRate;
 };
 
 }

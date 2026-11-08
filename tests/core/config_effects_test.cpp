@@ -64,14 +64,13 @@ TEST_F(ConfigEffectsTest, GenerationCountChangesGenerationsRan)
         config.generationCount = count;
 
         ga::GeneticAlgorithm<Sequence, int> ga {
-            baseSequence,
             evalFunction,
             operators,
             config
         };
 
         cb.callbackCount = 0;
-        ga.run(cb);
+        ga.run(baseSequence, {}, cb);
 
         EXPECT_EQ(cb.callbackCount, count);
     }
@@ -86,13 +85,13 @@ TEST_F(ConfigEffectsTest, PopulationSizeChangesSizeOfPopulation)
         config.populationSize = size;
 
         ga::GeneticAlgorithm<Sequence, int> ga {
-            baseSequence,
             evalFunction,
             operators,
             config
         };
 
         ga.run(
+            baseSequence, {},
             [size](const std::vector<Chromosome>& population, const Chromosome&)
             {
                 EXPECT_EQ(population.size(), size);
@@ -110,14 +109,13 @@ TEST_F(ConfigEffectsTest, CallbackIntervalChangesIntervalOfCallback)
         config.callbackInterval = interval;
 
         ga::GeneticAlgorithm ga {
-            baseSequence,
             evalFunction,
             operators,
             config
         };
 
         cb.callbackCount = 0;
-        ga.run(cb);
+        ga.run(baseSequence, {}, cb);
 
         if (config.callbackInterval == 0)
             EXPECT_EQ(cb.callbackCount, 0);

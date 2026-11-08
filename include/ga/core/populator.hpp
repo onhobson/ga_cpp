@@ -3,8 +3,6 @@
 
 #include "ga/common/random.hpp"
 
-#include "ga/core/config.hpp"
-
 #include "ga/operations/crossover.hpp"
 #include "ga/operations/mutate.hpp"
 
@@ -24,11 +22,11 @@ public:
     Populator(
         const Crossover<Sequence>& crossover,
         const Mutate<Sequence>& mutate,
-        const Config& config
+        double crossoverRate
     )   
         : m_crossover { crossover }
         , m_mutate { mutate }
-        , m_config { config }
+        , m_crossoverRate { crossoverRate }
     { }
 
     /**
@@ -41,7 +39,7 @@ public:
     {
         Sequence newSequence;
 
-        if (rng.getReal(0.0, 1.0) < m_config.crossoverRate)
+        if (rng.getReal(0.0, 1.0) < m_crossoverRate)
         {
             newSequence = m_crossover(seq1, seq2, rng);
         }
@@ -57,7 +55,7 @@ private:
     const Crossover<Sequence> m_crossover;
     const Mutate<Sequence> m_mutate;
 
-    const Config& m_config; ///< References the `ga::Config` object owned by the `ga::GeneticAlgorithm` object that created this `Populator`.
+    const double m_crossoverRate;
 };
 
 }

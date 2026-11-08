@@ -66,7 +66,7 @@ public:
             detail::Populator<Sequence> {
                 operators.crossover, 
                 operators.mutate,
-                m_config
+                config.crossoverRate
             }}
         , m_rng { Random(randomEngine) }
         , m_selector { 
@@ -86,12 +86,24 @@ public:
         { }
     };
 
+    /**
+     * @brief Runs the genetic algorithm for the number of generations specified in the `ga::Config` object, and returns the best `Chromosome` found.
+     * 
+     * @param baseSequence The base sequence to use for initializing the population.
+     * @param initializationFunction An optional initialization function that generates the initial population from the given base sequence.
+     *                               Must be invocable with `const Sequence&`, `std::size_t`, and `ga::Random&`, and return a `std::vector<Sequence>`.
+     *                               Defaults to `ga::init::RandomPermutation<Sequence>`.
+     * @param callback An optional callback function that is invoked at the end of each generation with the current population and the current best solution.
+     *                 Must be invocable with `const std::vector<Chromosome>&` and `const Chromosome&`.
+     * 
+     * @return The best `Chromosome` found after running the genetic algorithm for the specified number of generations.
+     */
     template <typename Initializer = init::RandomPermutation<Sequence>, typename Callback = NoOpCallback>
     requires (constraints::CallbackFunction<Callback, Sequence, Fitness> &&
               constraints::InitializationFunction<Initializer, Sequence>)
     Chromosome run(
         const Sequence& baseSequence,
-        Initializer&& initializationFunction,
+        Initializer&& initializationFunction = {},
         Callback&& callback = {}
     ) { 
         return run(std::invoke(initializationFunction, baseSequence, m_config.populationSize, m_rng), std::forward<Callback>(callback));
@@ -107,7 +119,7 @@ public:
      */
     template <typename Callback = NoOpCallback>
     requires (constraints::CallbackFunction<Callback, Sequence, Fitness>)
-    Chromosome run(const std::vector<Sequence>& population, Callback&& callback)
+    Chromosome run(const std::vector<Sequence>& population, Callback&& callback = {})
     {
         if (population.size() != m_config.populationSize)
             throw std::invalid_argument(std::format(
@@ -115,6 +127,7 @@ public:
             ));
 
         initializePopulation(population);
+        evaluateCurrentGeneration();
         
         // Begin GA loop
         for (int i {0}; i < m_config.generationCount; ++i)

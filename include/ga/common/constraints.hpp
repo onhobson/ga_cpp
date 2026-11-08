@@ -1,7 +1,10 @@
 #ifndef GA_CONSTRAINTS_HPP
 #define GA_CONSTRAINTS_HPP
 
+#include "ga/common/random.hpp"
 #include "ga/common/hash.hpp"
+
+#include "ga/core/chromosome.hpp"
 
 #include <concepts>
 #include <ranges>
@@ -47,6 +50,23 @@ namespace ga::constraints
         {
             typename T::value_type;
         };
+
+    template <typename Callback, typename Sequence, typename Fitness>
+    concept CallbackFunction =
+        std::invocable<
+            Callback&,
+            const std::vector<Chromosome<Sequence, Fitness>>&,
+            const Chromosome<Sequence, Fitness>&
+        >;
+
+    template <typename InitFunction, typename Sequence>
+    concept InitializationFunction =
+        std::invocable<
+            InitFunction&,
+            const Sequence&,
+            std::size_t,
+            Random&
+        >;
 
 }
 

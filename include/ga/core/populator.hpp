@@ -8,16 +8,12 @@
 #include "ga/operations/crossover.hpp"
 #include "ga/operations/mutate.hpp"
 
-#include <algorithm>
-#include <vector>
-
-#include <iostream>
 
 namespace ga::detail
 {
 
 /**
- * @brief A class that creates a population of sequences and generates new sequences based on crossover and mutation operations.
+ * @brief Provides access to and controls lifetimes of `Crossover` and `Mutate`.
  * 
  * @tparam Sequence The type that is used by the given crossover and mutation operators.
  */
@@ -34,29 +30,6 @@ public:
         , m_mutate { mutate }
         , m_config { config }
     { }
-
-    /**
-     * @brief Creates a randomized population of sequences based on the given base sequence.
-     */
-    std::vector<Sequence> createRandomizedPopulation(const Sequence& baseSequence, Random& rng) const
-    {
-        std::vector<Sequence> population {};
-        population.reserve(m_config.populationSize);
-
-        // Add given base sequence
-        population.push_back( Sequence {baseSequence} );
-        Sequence sequenceCopy { baseSequence };
-
-        // Add random shuffles of sequence until population size is reached
-        while (population.size() < m_config.populationSize)
-        {
-            std::shuffle(sequenceCopy.begin(), sequenceCopy.end(), rng.getEngine());
-
-            population.push_back(sequenceCopy);
-        }
-
-        return population;
-    }
 
     /**
      * @brief Creates a new sequence based on the given two parent sequences, using crossover and mutation operations.

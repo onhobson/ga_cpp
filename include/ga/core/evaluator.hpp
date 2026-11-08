@@ -5,6 +5,9 @@
 
 #include <concepts>
 #include <functional>
+#include <algorithm>
+#include <utility>
+#include <vector>
 
 namespace ga::detail
 {
@@ -20,32 +23,31 @@ class Evaluator
 public:
     using Chromosome = ga::Chromosome<Sequence, Fitness>;
     
-    Evaluator(std::function<Fitness(const Sequence&)> evaluate)
+    Evaluator(std::function<Fitness(const Sequence&)> evaluate, std::size_t eliteCount)
         : m_evaluate { evaluate }
+        , m_eliteCount { (eliteCount) ? eliteCount : 1 } // Upgrade eliteCount of 0 to 1 to allow GA to track top fitness using .front()
     { }
 
     /**
      * @brief Calls the given evaluation function on each chromosome in the population and updates the `fitness` member of each chromosome with the result.
      * 
-     * @returns `std::size_t` The index of the chromosome with the highest fitness
+     * Moves the top `eliteCount` (constructor parameter) chromosomes to the front of the population, ordered by decreasing fitness.
      */
-    std::size_t evaluate(std::vector<Chromosome>& population) const 
+    void evaluate(std::vector<Chromosome>& population)
     {
-        std::size_t best = 0;
-
-        for (std::size_t i = 0; i < population.size(); ++i)
+        for (auto& chromosome : population)
         {
-            population[i].fitness = m_evaluate(population[i].sequence);
-
-            if (population[i].fitness > population[best].fitness)
-                best = i;
+            chromosome.fitness = m_evaluate(chromosome.sequence);
         }
 
-        return best;
+        const auto eliteEnd = population.begin() + std::min(m_eliteCount, population.size());
+        std::ranges::partial_sort(population, eliteEnd, std::ranges::greater{}, &Chromosome::fitness);
     }
 
 private:
     std::function<Fitness(const Sequence&)> m_evaluate;
+
+    std::size_t m_eliteCount;
 };
 
 }

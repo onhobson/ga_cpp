@@ -25,14 +25,6 @@ namespace ga
 struct Config
 {
     /**
-     * @brief Maximum number of generations to execute.
-     *
-     * @details
-     * Must be greater than zero.
-     */
-    std::size_t generationCount { 500 };
-
-    /**
      * @brief Number of individuals in each generation.
      *
      * @details
@@ -82,10 +74,6 @@ struct Config
      */
     void validate() const 
     {
-        if (generationCount == 0)
-            throw std::invalid_argument("Generation count can not be 0");
-            
-
         if (populationSize == 0)
             throw std::invalid_argument("Population size can not be 0");
         if (populationSize < eliteCount)

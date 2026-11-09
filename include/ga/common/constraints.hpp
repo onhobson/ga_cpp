@@ -1,6 +1,7 @@
 #ifndef GA_CONSTRAINTS_HPP
 #define GA_CONSTRAINTS_HPP
 
+#include "ga/common/contexts.hpp"
 #include "ga/common/random.hpp"
 #include "ga/common/hash.hpp"
 
@@ -66,6 +67,13 @@ namespace ga::constraints
             const Sequence&,
             std::size_t,
             Random&
+        >;
+
+    template <typename Terminator, typename Fitness>
+    concept TerminationCondition =
+        std::invocable<
+            Terminator&,
+            const detail::TerminationContext<Fitness>&
         >;
 
 }

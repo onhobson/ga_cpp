@@ -25,6 +25,7 @@ package_add_test(common
     common/random_test.cpp
     common/constraints_test.cpp
     common/init_test.cpp
+    common/terminators_test.cpp
 )
 
 package_add_test(operations 

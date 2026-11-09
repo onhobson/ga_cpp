@@ -20,11 +20,13 @@ protected:
     int mutationCount = 0;
 
     ga::Config config {
-        .generationCount = 10,
         .populationSize = 10,
         .eliteCount = 2,
         .crossoverRate = 0.0
     };
+
+    const std::size_t generationCount { 100 };
+
     ga::Operators<Sequence> operators {
         ga::Crossover<Sequence> {
             [this](const Sequence& first, const Sequence&, ga::Random&)
@@ -72,10 +74,11 @@ TEST_F(GeneticAlgorithmTest, RunCallsEvaluationFunctionCorrectAmount)
         config
     };
 
-    ga.run(baseSequence);
+    
+    ga.run(baseSequence, {}, { generationCount });
 
     // +1 because initial pop is evaluated once before run() loop
-    int expectedEvaluationCalls = config.populationSize * (config.generationCount + 1); 
+    int expectedEvaluationCalls = config.populationSize * (generationCount + 1); 
 
     EXPECT_EQ(evaluationCount, expectedEvaluationCalls); 
 }
@@ -88,9 +91,9 @@ TEST_F(GeneticAlgorithmTest, RunCallsOperatorFunctionCorrectAmount)
         config
     };
 
-    ga.run(baseSequence);
+    ga.run(baseSequence, {}, { generationCount });
 
-    int expectedOperatorCalls = config.generationCount * (config.populationSize - config.eliteCount);
+    int expectedOperatorCalls = generationCount * (config.populationSize - config.eliteCount);
 
     EXPECT_EQ(crossoverCount, 0);
     EXPECT_EQ(mutationCount, expectedOperatorCalls);
@@ -104,9 +107,9 @@ TEST_F(GeneticAlgorithmTest, RunCallsCallbackFunctionCorrectAmount)
         config
     };
 
-    ga.run(baseSequence, {}, cb);
+    ga.run(baseSequence, {}, { generationCount }, cb);
 
-    EXPECT_EQ(cb.callbackCount, config.generationCount);
+    EXPECT_EQ(cb.callbackCount, generationCount);
 }
 
 TEST_F(GeneticAlgorithmTest, RunReturnsTopChromosome)
@@ -133,7 +136,7 @@ TEST_F(GeneticAlgorithmTest, RunReturnsTopChromosome)
             config
         };
 
-        Chromosome result = ga.run(baseSequence);
+        Chromosome result = ga.run(baseSequence, {}, { generationCount });
 
         EXPECT_EQ(result.sequence, baseSequence);
         EXPECT_EQ(result.fitness, evalFunction(baseSequence));

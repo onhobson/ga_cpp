@@ -7,8 +7,8 @@
 namespace ga::init
 {
 
+
 template <typename Sequence>
-requires constraints::Permutable<Sequence>
 struct RandomPermutation
 {
     std::vector<Sequence> operator()(const Sequence& baseSequence, std::size_t size, Random& rng) const
@@ -24,7 +24,7 @@ struct RandomPermutation
 
         while (population.size() < size)
         {
-            std::shuffle(sequenceCopy.begin(), sequenceCopy.end(), rng.getEngine());
+            std::ranges::shuffle(sequenceCopy, rng.getEngine());
 
             population.push_back(sequenceCopy);
         }

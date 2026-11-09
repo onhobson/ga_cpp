@@ -4,6 +4,8 @@
 #include "ga/common/constraints.hpp"
 #include "ga/common/random.hpp"
 #include "ga/common/initializers.hpp"
+#include "ga/common/terminators.hpp"
+#include "ga/common/contexts.hpp"
 
 #include "ga/core/chromosome.hpp"
 #include "ga/core/config.hpp"
@@ -33,13 +35,14 @@ namespace ga
  * @brief A class that implements a genetic algorithm to evolve a population of chromosomes towards an optimal solution.
  * 
  * @tparam Sequence The type that is used by the given crossover and mutation operators.
- * @tparam Fitness The type that is returned by the given evaluation function.
+ * @tparam Fitness The type that is returned by the given evaluation function. Must satisfy `std::totally_ordered<Fitness>`
  * @tparam URBG The type of the random number generator engine to use. Defaults to `std::mt19937`.
  *         Must satisfy the requirements of a uniform random bit generator.
  * 
  * @throws `std::invalid_argument` If the configuration parameters or operators are invalid.
  */
 template <typename Sequence, typename Fitness, std::uniform_random_bit_generator URBG = std::mt19937>
+requires std::totally_ordered<Fitness>
 class GeneticAlgorithm
 {
 public:
@@ -98,15 +101,25 @@ public:
      * 
      * @return The best `Chromosome` found after running the genetic algorithm for the specified number of generations.
      */
-    template <typename Initializer = init::RandomPermutation<Sequence>, typename Callback = NoOpCallback>
-    requires (constraints::CallbackFunction<Callback, Sequence, Fitness> &&
-              constraints::InitializationFunction<Initializer, Sequence>)
+    template <
+        typename Initializer = init::RandomPermutation<Sequence>, 
+        typename Callback = NoOpCallback
+    >
+    requires (
+        constraints::InitializationFunction<Initializer, Sequence> &&
+        constraints::CallbackFunction<Callback, Sequence, Fitness>
+    )
     Chromosome run(
         const Sequence& baseSequence,
-        Initializer&& initializationFunction = {},
+        Initializer initializationFunction = {},
+        terminate::TerminationPolicy<> terminate = {},
         Callback&& callback = {}
     ) { 
-        return run(std::invoke(initializationFunction, baseSequence, m_config.populationSize, m_rng), std::forward<Callback>(callback));
+        return run(
+            std::invoke(initializationFunction, baseSequence, m_config.populationSize, m_rng),
+            std::move(terminate), 
+            std::forward<Callback>(callback)
+        );
     }
 
     /**
@@ -117,10 +130,17 @@ public:
      * 
      * @return The best `Chromosome` found after running the genetic algorithm for the specified number of generations.
      */
-    template <typename Callback = NoOpCallback>
-    requires (constraints::CallbackFunction<Callback, Sequence, Fitness>)
-    Chromosome run(const std::vector<Sequence>& population, Callback&& callback = {})
-    {
+    template <
+        typename Callback = NoOpCallback
+    >
+    requires (
+        constraints::CallbackFunction<Callback, Sequence, Fitness>
+    )
+    Chromosome run(
+        const std::vector<Sequence>& population, 
+        terminate::TerminationPolicy<> terminate = {},
+        Callback&& callback = {}
+    ) {
         if (population.size() != m_config.populationSize)
             throw std::invalid_argument(std::format(
                 "Given population size was not equal to specified population size in Config object. {} vs {}", population.size(), m_config.populationSize
@@ -130,8 +150,10 @@ public:
         evaluateCurrentGeneration();
         
         // Begin GA loop
-        for (int i {0}; i < m_config.generationCount; ++i)
+        while (!terminate(createTerminationContext()))
         {
+            ++m_generationCount;
+
             createNewGeneration();
             
             evaluateCurrentGeneration();
@@ -158,6 +180,7 @@ private:
     Chromosome m_bestSolution {};
 
     int m_sinceLastCallback { 0 };
+    std::size_t m_generationCount { 0 };
 
     const Config m_config;
     const detail::Populator<Sequence> m_populator;
@@ -214,6 +237,14 @@ private:
 
         if (m_currentPopulation.front().fitness > m_bestSolution.fitness)
             m_bestSolution = m_currentPopulation.front();
+    }
+    
+    detail::TerminationContext<Fitness> createTerminationContext() const
+    {
+        return detail::TerminationContext<Fitness> {
+            .generation { m_generationCount },
+            .bestFitness { m_bestSolution.fitness }
+        };
     }
 
     std::size_t getRandomPopulationIndex(std::size_t omit = -1)

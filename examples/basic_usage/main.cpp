@@ -35,18 +35,28 @@ int main()
 {   
     using Sequence = std::vector<int>;
 
+    ga::Operators<Sequence> {
+        ga::Crossover<Sequence> { },
+        ga::Mutate<Sequence> {
+            {
+                ga::functions::mutate::swap<Sequence>,
+                ga::functions::mutate::inversion<Sequence>
+            },
+            { 1.0, 1.0 }
+        }
+    };
+
     ga::Config config {
-        .generationCount{ 100 },
-        .populationSize{ 20 },
+        .populationSize{ 10 },
         .eliteCount{ 2 },
         .tournamentSize{ 3 },
         .crossoverRate{ 0.7 },
-        // .stagnationLimit{ 0 },
         .callbackInterval{ 1 }
     };
 
+    std::vector<int> baseSeq {81, 83, 14, 64, 33, 10, 27, 51, 61, 23};
+
     ga::GeneticAlgorithm<Sequence, int> ga { 
-        {81, 83, 14, 64, 33, 10, 27, 51, 61, 23},
         evaluationFunction,
         ga::prebuilt::permutationOperators<Sequence>(),
         config
@@ -56,7 +66,10 @@ int main()
     std::cout << "\nRUNNING\n";
 
     Callback cb {};
-    ga::Chromosome elite { ga.run(cb) };
+    ga::Chromosome elite { ga.run(
+        baseSeq, {}, {},
+        cb
+    )};
 
     for (auto n : cb.topFitProgression)
         std::cout << n << ", ";

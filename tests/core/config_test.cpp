@@ -20,29 +20,6 @@ std::function<int(const std::vector<int>&)> evalFunc = [](const std::vector<int>
 ga::Operators<std::vector<int>> operators { ga::prebuilt::permutationOperators<std::vector<int>>() };
 
 
-TEST(ConfigValidationTest, GenerationCountOfZeroThrows)
-{
-    ga::Config config {
-        .generationCount { 0 }
-    };
-
-    EXPECT_THROW(
-        (ga::GeneticAlgorithm { evalFunc, operators, config }),
-        std::invalid_argument
-    );
-}
-
-TEST(ConfigValidationTest, ValidGenerationCountDoesNotThrow)
-{
-    ga::Config config {
-        .generationCount { 100 }
-    };
-
-    EXPECT_NO_THROW(
-        (ga::GeneticAlgorithm { evalFunc, operators, config })
-    );
-}
-
 TEST(ConfigValidationTest, PopulationSizeOfZeroThrows)
 {
     ga::Config config {

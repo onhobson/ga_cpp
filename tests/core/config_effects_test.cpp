@@ -15,11 +15,12 @@ class ConfigEffectsTest : public testing::Test
 {
 protected:
     ga::Config config {
-        .generationCount = 10,
         .populationSize = 10,
         .eliteCount = 2,
         .crossoverRate = 0.7
     };
+
+    const std::size_t generationCount { 100 };
 
     ga::Operators<Sequence> operators {
         ga::Crossover<Sequence> {
@@ -57,25 +58,6 @@ protected:
 };
 
 
-TEST_F(ConfigEffectsTest, GenerationCountChangesGenerationsRan)
-{
-    for (std::size_t count : { 5, 8 })
-    {
-        config.generationCount = count;
-
-        ga::GeneticAlgorithm<Sequence, int> ga {
-            evalFunction,
-            operators,
-            config
-        };
-
-        cb.callbackCount = 0;
-        ga.run(baseSequence, {}, cb);
-
-        EXPECT_EQ(cb.callbackCount, count);
-    }
-}
-
 TEST_F(ConfigEffectsTest, PopulationSizeChangesSizeOfPopulation)
 {
     for (std::size_t size : { 5, 8 })
@@ -90,13 +72,13 @@ TEST_F(ConfigEffectsTest, PopulationSizeChangesSizeOfPopulation)
             config
         };
 
-        ga.run(
-            baseSequence, {},
+        std::function<void(const std::vector<Chromosome>&, const Chromosome&)> callback =
             [size](const std::vector<Chromosome>& population, const Chromosome&)
             {
                 EXPECT_EQ(population.size(), size);
-            }
-        );
+            };
+
+        ga.run(baseSequence, {}, { generationCount }, callback);
     }
 }
 
@@ -115,11 +97,11 @@ TEST_F(ConfigEffectsTest, CallbackIntervalChangesIntervalOfCallback)
         };
 
         cb.callbackCount = 0;
-        ga.run(baseSequence, {}, cb);
+        ga.run(baseSequence, {}, { generationCount }, cb);
 
         if (config.callbackInterval == 0)
             EXPECT_EQ(cb.callbackCount, 0);
         else
-            EXPECT_EQ(cb.callbackCount, static_cast<int>(config.generationCount / config.callbackInterval));
+            EXPECT_EQ(cb.callbackCount, static_cast<int>(generationCount / config.callbackInterval));
     }
 }

@@ -16,7 +16,7 @@ namespace
     {
         auto rng { makeRandom(12345) };
         const auto population {
-            ga::init::RandomPermutation<Sequence> {}(baseSequence, populationSize, rng)
+            ga::init::RandomPermutation{}(baseSequence, populationSize, rng)
         };
 
         ASSERT_EQ(population.size(), populationSize);

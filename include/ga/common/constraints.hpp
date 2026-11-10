@@ -52,14 +52,23 @@ namespace ga::constraints
             typename T::value_type;
         };
 
+    /**
+     * @brief A concept that checks if a type is a valid callback function for the genetic algorithm.
+     * 
+     * @returns `true` if the type is invocable with a `ga::context::CallbackContext` instance; otherwise, returns `false`.
+     */
     template <typename Callback, typename Sequence, typename Fitness>
     concept CallbackFunction =
         std::invocable<
             Callback&,
-            const std::vector<Chromosome<Sequence, Fitness>>&,
-            const Chromosome<Sequence, Fitness>&
+            const ga::context::CallbackContext<Sequence, Fitness>&
         >;
 
+    /**
+     * @brief A concept that checks if a type is a valid initialization function for the genetic algorithm.
+     * 
+     * @returns `true` if the type is invocable with a `const Sequence&`, `std::size_t`, and `ga::Random&`, and returns a `std::vector<Sequence>`; otherwise, returns `false`.
+     */
     template <typename InitFunction, typename Sequence>
     concept InitializationFunction =
         std::invocable<
@@ -67,13 +76,34 @@ namespace ga::constraints
             const Sequence&,
             std::size_t,
             Random&
+        > &&
+        std::same_as<
+            std::invoke_result_t<
+                InitFunction&, 
+                const Sequence&, 
+                std::size_t, 
+                Random&
+            >, 
+            std::vector<Sequence>
         >;
 
+    /**
+     * @brief A concept that checks if a type is a valid termination condition for the genetic algorithm.
+     * 
+     * @returns `true` if the type is invocable with a `ga::context::TerminationContext` instance and returns a `bool`; otherwise, returns `false`.
+     */
     template <typename Terminator, typename Fitness>
     concept TerminationCondition =
         std::invocable<
             Terminator&,
-            const detail::TerminationContext<Fitness>&
+            const context::TerminationContext<Fitness>&
+        > &&
+        std::convertible_to<
+            std::invoke_result_t<
+                Terminator&,
+                const context::TerminationContext<Fitness>&
+            >,
+            bool
         >;
 
 }

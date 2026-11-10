@@ -6,7 +6,7 @@ namespace
 {
 
 template <typename Fitness>
-using Context = ga::detail::TerminationContext<Fitness>;
+using Context = ga::context::TerminationContext<Fitness>;
 
 struct ComparableFitness
 {

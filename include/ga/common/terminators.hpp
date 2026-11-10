@@ -9,10 +9,15 @@
 namespace ga::terminate
 {
 
+/**
+ * @brief A no-operation terminator that always returns false.
+ * 
+ * This terminator can be used as a default or placeholder when no termination condition is desired.
+ */
 struct NoOpTerminator
 {
     template <typename Fitness>
-    bool operator()(const detail::TerminationContext<Fitness>& context) const
+    bool operator()(const context::TerminationContext<Fitness>& context) const
     {
         return false;
     }
@@ -20,6 +25,11 @@ struct NoOpTerminator
 
 #pragma region AGGREGATES
 
+/**
+ * @brief A terminator that returns true if any of the given termination conditions return true.
+ * 
+ * @tparam Conditions The types of the termination conditions to combine. Must satisfy the `ga::constraints::TerminationCondition` concept.
+ */
 template <typename... Conditions>
 class AnyOf
 {
@@ -30,7 +40,7 @@ public:
 
     template <typename Fitness>
     requires (constraints::TerminationCondition<Conditions, Fitness> && ...)
-    bool operator()(const detail::TerminationContext<Fitness>& context)
+    bool operator()(const context::TerminationContext<Fitness>& context)
     {
         return std::apply(
             [&](auto&... condition)
@@ -45,6 +55,11 @@ private:
     std::tuple<Conditions...> m_conditions;
 };
 
+/**
+ * @brief A terminator that returns true only if all of the given termination conditions return true.
+ * 
+ * @tparam Conditions The types of the termination conditions to combine. Must satisfy the `ga::constraints::TerminationCondition` concept.
+ */
 template <typename... Conditions>
 class AllOf
 {
@@ -55,7 +70,7 @@ public:
 
     template <typename Fitness>
     requires (constraints::TerminationCondition<Conditions, Fitness> && ...)
-    bool operator()(const detail::TerminationContext<Fitness>& context)
+    bool operator()(const context::TerminationContext<Fitness>& context)
     {
         return std::apply(
             [&](auto&... condition)
@@ -75,28 +90,44 @@ private:
 
 #pragma region COMPOSITIONS
 
+/**
+ * @brief A terminator that returns true if the current generation number is greater than or equal to a specified limit.
+ */
 struct GenerationLimit
 {
     std::size_t count { 100 };
 
     template <typename Fitness>
-    bool operator()(const detail::TerminationContext<Fitness>& context) const
+    bool operator()(const context::TerminationContext<Fitness>& context) const
     {
         return context.generation >= count;
     }
 };
 
+/**
+ * @brief A terminator that returns true if the best fitness value is greater than or equal to a specified threshold.
+ * 
+ * @tparam Fitness The type of the fitness value used in the genetic algorithm.
+ */
 template <typename Fitness>
 struct FitnessThreshold
 {
     Fitness threshold;
 
-    bool operator()(const detail::TerminationContext<Fitness>& context) const
+    bool operator()(const context::TerminationContext<Fitness>& context) const
     {
         return context.bestFitness >= threshold;
     }
 };
 
+/**
+ * @brief A terminator that returns true if the best fitness value has not improved for a specified number of generations.
+ * 
+ * @tparam Fitness The type of the fitness value used in the genetic algorithm.
+ * 
+ * @param limit The number of generations to wait for an improvement before terminating.
+ * @param margin An optional margin that defines the minimum improvement required to reset the stagnation counter. If not provided, any improvement will reset the counter.
+ */
 template <typename Fitness>
 class StagnationLimit
 {
@@ -110,7 +141,7 @@ public:
         , m_margin { margin }
     { }
 
-    bool operator()(const detail::TerminationContext<Fitness>& context)
+    bool operator()(const context::TerminationContext<Fitness>& context)
     {
         if ((m_margin.has_value() && (context.bestFitness - m_previousBest) >= m_margin.value()) || // Fitness improvement meets margin req
             (!m_margin.has_value() && context.bestFitness > m_previousBest)) // No margin req, fitness is improved
@@ -137,7 +168,11 @@ private:
 
 #pragma region POLICY
 
-// MAIN WRAPPER
+/**
+ * @brief A termination policy that combines a generation limit with an optional custom termination condition.
+ * 
+ * @tparam Condition The type of the custom termination condition. Must satisfy the `ga::constraints::TerminationCondition` concept. Defaults to `NoOpTerminator`.
+ */
 template <typename Condition = NoOpTerminator>
 class TerminationPolicy
 {
@@ -152,7 +187,7 @@ public:
 
     template <typename Fitness>
     requires constraints::TerminationCondition<Condition, Fitness>
-    bool operator()(const detail::TerminationContext<Fitness>& context)
+    bool operator()(const context::TerminationContext<Fitness>& context)
     {
         return m_generationLimit(context) || m_condition(context);
         

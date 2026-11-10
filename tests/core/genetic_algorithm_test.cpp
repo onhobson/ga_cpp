@@ -56,13 +56,20 @@ protected:
     {
         int callbackCount = 0;
 
-        void operator()(const std::vector<Chromosome>&, const Chromosome&)
+        void operator()(const ga::context::CallbackContext<Sequence, int>&)
         {
             ++callbackCount;
         }
     };
 
     CountingCallback cb {};
+
+    // Explicit template because CTAD does not deduce non-static data members
+    ga::RunOptions<
+        ga::init::RandomPermutation,
+        ga::terminate::TerminationPolicy<>,
+        ga::callback::NoOpCallback
+    > options { .terminator = { generationCount } };
 };
 
 
@@ -75,7 +82,7 @@ TEST_F(GeneticAlgorithmTest, RunCallsEvaluationFunctionCorrectAmount)
     };
 
     
-    ga.run(baseSequence, {}, { generationCount });
+    ga.run(baseSequence, options);
 
     // +1 because initial pop is evaluated once before run() loop
     int expectedEvaluationCalls = config.populationSize * (generationCount + 1); 
@@ -91,7 +98,7 @@ TEST_F(GeneticAlgorithmTest, RunCallsOperatorFunctionCorrectAmount)
         config
     };
 
-    ga.run(baseSequence, {}, { generationCount });
+    ga.run(baseSequence, options);
 
     int expectedOperatorCalls = generationCount * (config.populationSize - config.eliteCount);
 
@@ -107,7 +114,12 @@ TEST_F(GeneticAlgorithmTest, RunCallsCallbackFunctionCorrectAmount)
         config
     };
 
-    ga.run(baseSequence, {}, { generationCount }, cb);
+    ga::RunOptions options {
+        .terminator = { generationCount },
+        .callback = cb
+    };
+
+    ga.run(baseSequence, options);
 
     EXPECT_EQ(cb.callbackCount, generationCount);
 }
@@ -136,7 +148,7 @@ TEST_F(GeneticAlgorithmTest, RunReturnsTopChromosome)
             config
         };
 
-        Chromosome result = ga.run(baseSequence, {}, { generationCount });
+        Chromosome result = ga.run(baseSequence, options);
 
         EXPECT_EQ(result.sequence, baseSequence);
         EXPECT_EQ(result.fitness, evalFunction(baseSequence));

@@ -1,8 +1,10 @@
 #ifndef GA_GENETIC_ALGORITHM_HPP
 #define GA_GENETIC_ALGORITHM_HPP
 
+#include "ga/common/callbacks.hpp"
 #include "ga/common/constraints.hpp"
 #include "ga/common/random.hpp"
+#include "ga/common/run_options.hpp"
 #include "ga/common/initializers.hpp"
 #include "ga/common/terminators.hpp"
 #include "ga/common/contexts.hpp"
@@ -18,7 +20,6 @@
 #include "ga/operations/mutate.hpp"
 
 #include <algorithm>
-#include <cstdlib>
 #include <iostream>
 #include <numeric>
 #include <vector>
@@ -82,75 +83,62 @@ public:
     } 
 
 
-    /// @brief A no-operation callback that does nothing when invoked.
-    struct NoOpCallback
-    {
-        void operator()(const std::vector<Chromosome>&, const Chromosome&) const noexcept
-        { }
-    };
-
     /**
-     * @brief Runs the genetic algorithm for the number of generations specified in the `ga::Config` object, and returns the best `Chromosome` found.
+     * @brief Creates an initial population using the given initializer and base sequence, then runs the genetic algorithm until the termination condition is met, and returns the best `Chromosome` found.
      * 
      * @param baseSequence The base sequence to use for initializing the population.
-     * @param initializationFunction An optional initialization function that generates the initial population from the given base sequence.
-     *                               Must be invocable with `const Sequence&`, `std::size_t`, and `ga::Random&`, and return a `std::vector<Sequence>`.
-     *                               Defaults to `ga::init::RandomPermutation<Sequence>`.
-     * @param callback An optional callback function that is invoked at the end of each generation with the current population and the current best solution.
-     *                 Must be invocable with `const std::vector<Chromosome>&` and `const Chromosome&`.
+     * @param options A `ga::RunOptions` object containing the initializer, terminator, and callback functions to use during the run.
      * 
      * @return The best `Chromosome` found after running the genetic algorithm for the specified number of generations.
      */
-    template <
-        typename Initializer = init::RandomPermutation<Sequence>, 
-        typename Callback = NoOpCallback
-    >
+    template <typename Initializer, typename Terminator, typename Callback>
     requires (
         constraints::InitializationFunction<Initializer, Sequence> &&
+        constraints::TerminationCondition<Terminator, Fitness> &&
         constraints::CallbackFunction<Callback, Sequence, Fitness>
     )
     Chromosome run(
         const Sequence& baseSequence,
-        Initializer initializationFunction = {},
-        terminate::TerminationPolicy<> terminate = {},
-        Callback&& callback = {}
+        RunOptions<Initializer, Terminator, Callback> options
     ) { 
         return run(
-            std::invoke(initializationFunction, baseSequence, m_config.populationSize, m_rng),
-            std::move(terminate), 
-            std::forward<Callback>(callback)
+            std::invoke(options.initializer, baseSequence, m_config.populationSize, m_rng),
+            std::move(options)
         );
     }
 
     /**
-     * @brief Runs the genetic algorithm for the number of generations specified in the `ga::Config` object, and returns the best `Chromosome` found.
+     * @brief Runs the genetic algorithm until the termination condition is met, and returns the best `Chromosome` found.
      * 
-     * @param callback An optional callback function that is invoked at the end of each generation with the current population and the current best solution.
-     *                 Must be invocable with `const std::vector<Chromosome>&` and `const Chromosome&`.
+     * @param population The initial population of Sequences to evolve.
+     * @param options A `ga::RunOptions` object containing the initializer, terminator, and callback functions to use during the run.
      * 
      * @return The best `Chromosome` found after running the genetic algorithm for the specified number of generations.
      */
-    template <
-        typename Callback = NoOpCallback
-    >
+    template <typename Initializer, typename Terminator, typename Callback>
     requires (
+        constraints::TerminationCondition<Terminator, Fitness> &&
         constraints::CallbackFunction<Callback, Sequence, Fitness>
     )
     Chromosome run(
         const std::vector<Sequence>& population, 
-        terminate::TerminationPolicy<> terminate = {},
-        Callback&& callback = {}
+        RunOptions<Initializer, Terminator, Callback> options
     ) {
         if (population.size() != m_config.populationSize)
             throw std::invalid_argument(std::format(
                 "Given population size was not equal to specified population size in Config object. {} vs {}", population.size(), m_config.populationSize
             ));
 
+        // Default all tracking members
+        m_bestSolution = {};
+        m_sinceLastCallback = 0;
+        m_generationCount = 0;
+
         initializePopulation(population);
         evaluateCurrentGeneration();
         
         // Begin GA loop
-        while (!terminate(createTerminationContext()))
+        while (!options.terminator(createTerminationContext()))
         {
             ++m_generationCount;
 
@@ -165,7 +153,7 @@ public:
             // Call callback if interval not set to 0 and interval reached
             if (m_config.callbackInterval && ++m_sinceLastCallback >= m_config.callbackInterval)
             {
-                std::invoke(callback, currentPopulation, bestSolution);
+                std::invoke(options.callback, createCallbackContext());
                 m_sinceLastCallback = 0;
             }
         } 
@@ -239,11 +227,20 @@ private:
             m_bestSolution = m_currentPopulation.front();
     }
     
-    detail::TerminationContext<Fitness> createTerminationContext() const
+    context::TerminationContext<Fitness> createTerminationContext() const
     {
-        return detail::TerminationContext<Fitness> {
+        return context::TerminationContext<Fitness> {
             .generation { m_generationCount },
             .bestFitness { m_bestSolution.fitness }
+        };
+    }
+
+    context::CallbackContext<Sequence, Fitness> createCallbackContext() const
+    {
+        return context::CallbackContext<Sequence, Fitness> {
+            .population { m_currentPopulation },
+            .best { m_bestSolution },
+            .generation { m_generationCount }
         };
     }
 

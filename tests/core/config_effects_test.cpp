@@ -48,7 +48,7 @@ protected:
     {
         int callbackCount = 0;
 
-        void operator()(const std::vector<Chromosome>&, const Chromosome&)
+        void operator()(const ga::context::CallbackContext<Sequence, int>&)
         {
             ++callbackCount;
         }
@@ -72,13 +72,17 @@ TEST_F(ConfigEffectsTest, PopulationSizeChangesSizeOfPopulation)
             config
         };
 
-        std::function<void(const std::vector<Chromosome>&, const Chromosome&)> callback =
-            [size](const std::vector<Chromosome>& population, const Chromosome&)
+        std::function<void(const ga::context::CallbackContext<Sequence, int>&)> callback =
+            [size](const ga::context::CallbackContext<Sequence, int>& context)
             {
-                EXPECT_EQ(population.size(), size);
+                EXPECT_EQ(context.population.size(), size);
             };
 
-        ga.run(baseSequence, {}, { generationCount }, callback);
+        ga::RunOptions options {
+            .callback = callback
+        };
+
+        ga.run(baseSequence, options);
     }
 }
 
@@ -97,7 +101,11 @@ TEST_F(ConfigEffectsTest, CallbackIntervalChangesIntervalOfCallback)
         };
 
         cb.callbackCount = 0;
-        ga.run(baseSequence, {}, { generationCount }, cb);
+        ga::RunOptions options {
+            .callback = cb
+        };
+
+        ga.run(baseSequence, options);
 
         if (config.callbackInterval == 0)
             EXPECT_EQ(cb.callbackCount, 0);

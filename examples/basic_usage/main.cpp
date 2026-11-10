@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 
+using Sequence = std::vector<int>;
 
 int evaluationFunction(const std::vector<int>& sequence)
 {
@@ -22,7 +23,7 @@ struct Callback
     int callCount {};
     std::vector<int> topFitProgression;
 
-    void operator()(auto population, auto elite)
+    void operator()(const ga::context::CallbackContext<Sequence, int>& context)
     {
         ++callCount;
         // std::cout << callCount << ' ' << population.size() << '\n';
@@ -33,7 +34,6 @@ struct Callback
 
 int main()
 {   
-    using Sequence = std::vector<int>;
 
     ga::Operators<Sequence> {
         ga::Crossover<Sequence> { },
@@ -63,13 +63,24 @@ int main()
     };
 
 
+    ga::terminate::TerminationPolicy terminate {
+        10000,
+        ga::terminate::AllOf {
+            ga::terminate::GenerationLimit { 1000 },
+            ga::terminate::StagnationLimit<int> { 100 }
+        }
+    };
+
+
     std::cout << "\nRUNNING\n";
 
     Callback cb {};
-    ga::Chromosome elite { ga.run(
-        baseSeq, {}, {},
-        cb
-    )};
+
+    ga::RunOptions options {
+        .callback = cb
+    };
+
+    ga::Chromosome elite { ga.run(baseSeq, options)};
 
     for (auto n : cb.topFitProgression)
         std::cout << n << ", ";

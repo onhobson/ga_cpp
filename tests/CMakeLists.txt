@@ -10,7 +10,7 @@ function(package_add_test TESTNAME)
     
     target_link_libraries("${TESTNAME}" 
         PRIVATE
-            ga 
+            ga::ga 
             GTest::gtest_main
     )
     

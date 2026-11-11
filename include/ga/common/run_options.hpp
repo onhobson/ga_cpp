@@ -25,7 +25,6 @@ struct RunOptions
     Initializer initializer {};
     Terminator terminator {};
     Callback& callback { callback::defaultCallback };
-    // detail::CallbackReference<Callback> callback {};
 };
 
 }

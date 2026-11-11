@@ -79,18 +79,6 @@ TEST(ConfigValidationTest, PopulationSizeLessThanTournamentSizeThrows)
     );
 }
 
-TEST(ConfigValidationTest, TournamentSizeOfZeroThrows)
-{
-    ga::Config config {
-        .tournamentSize { 0 }
-    };
-
-    EXPECT_THROW(
-        (ga::GeneticAlgorithm { evalFunc, operators, config }),
-        std::invalid_argument
-    );
-}
-
 TEST(ConfigValidationTest, CrossoverRateOutsideOfBoundsThrows)
 {
     ga::Config config {

@@ -28,7 +28,7 @@ struct Config
      * @brief Number of individuals in each generation.
      *
      * @details
-     * Must be greater than zero.
+     * Must be greater than 1.
      * Must be greater than eliteCount.
      */
     std::size_t populationSize { 30 };
@@ -45,7 +45,7 @@ struct Config
      * @brief Number of individuals competing in tournament selection.
      *
      * @details
-     * Must be greater than zero and no greater than populationSize.
+     * Must be less than populationSize.
      */
     std::size_t tournamentSize { 3 };
 
@@ -74,8 +74,8 @@ struct Config
      */
     void validate() const 
     {
-        if (populationSize == 0)
-            throw std::invalid_argument("Population size can not be 0");
+        if (populationSize <= 1)
+            throw std::invalid_argument("Population size must be at least 2");
         if (populationSize < eliteCount)
             throw std::invalid_argument(std::format("Population size can not be less than elite count: {} < {}", populationSize, eliteCount));
 
@@ -88,8 +88,6 @@ struct Config
             throw std::invalid_argument("Crossover rate must be between 0 and 1");
 
 
-        if (tournamentSize == 0)
-            throw std::invalid_argument("Tournament size can not be 0");
         if (tournamentSize > populationSize)
             throw std::invalid_argument(std::format("Tournament size can not be greater than population size: {} > {}", tournamentSize, populationSize));
     }

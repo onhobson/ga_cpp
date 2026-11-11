@@ -60,3 +60,10 @@ package_add_test(core
     core/genetic_algorithm_test.cpp
     core/selector_test.cpp
 )
+
+package_add_test(end_to_end
+    end_to_end/basic_usage_test.cpp
+    end_to_end/evaluation_test.cpp
+    end_to_end/initialization_test.cpp
+    end_to_end/termination_test.cpp
+)

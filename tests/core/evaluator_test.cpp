@@ -13,7 +13,7 @@ class EvaluatorTest : public testing::Test
 {
 protected:
     int evalCount = 0;
-    ga::detail::Evaluator<int, int> evaluator;
+    ga::detail::Evaluator<int, int, std::greater<int>> evaluator;
 
     std::vector<int> values { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     std::vector<Chromosome> population;
@@ -21,10 +21,10 @@ protected:
     EvaluatorTest()
         : evaluator {
             [this](int n)
-                {
-                    ++evalCount;
-                    return n * 2;
-                },
+            {
+                ++evalCount;
+                return n * 2;
+            },
             1
         }
     { 
@@ -58,7 +58,13 @@ TEST_F(EvaluatorTest, ElitesAreKeptInFrontOfPopulation)
         SCOPED_TRACE("eliteCount=" + std::to_string(eliteCount));
         population = tmpPop;
 
-        ga::detail::Evaluator<int, int> evaluator { [](int n){ return n * 2; }, eliteCount };
+        ga::detail::Evaluator<int, int, std::greater<int>> evaluator { 
+            [](int n)
+            { 
+                return n * 2; 
+            },
+            eliteCount 
+        };
 
         evaluator.evaluate(population);
 
@@ -96,7 +102,14 @@ TEST_F(EvaluatorTest, MoreThanHalfOfThePopulationCanBeElite)
     for (std::size_t i { 0 }; i < population.size(); ++i)
         population[i].sequence = static_cast<int>(population.size() - i);
 
-    ga::detail::Evaluator<int, int> evaluator { [](int n){ return n * 2; }, 7 };
+    ga::detail::Evaluator<int, int, std::greater<int>> evaluator { 
+        [](int n)
+        { 
+            return n * 2; 
+        },
+        7 
+    };
+
     evaluator.evaluate(population);
 
     for (std::size_t i { 0 }; i < 7; ++i)

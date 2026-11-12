@@ -37,13 +37,22 @@ namespace ga
  * 
  * @tparam Sequence The type that is used by the given crossover and mutation operators.
  * @tparam Fitness The type that is returned by the given evaluation function. Must satisfy `std::totally_ordered<Fitness>`
+ * @tparam Compare A comparison function object that defines the ordering of fitness values. Must satisfy `std::strict_weak_order<Compare, Fitness, Fitness>`. Defaults to `std::ranges::greater`.
  * @tparam URBG The type of the random number generator engine to use. Defaults to `std::mt19937`.
  *         Must satisfy the requirements of a uniform random bit generator.
  * 
  * @throws `std::invalid_argument` If the configuration parameters or operators are invalid.
  */
-template <typename Sequence, typename Fitness, std::uniform_random_bit_generator URBG = std::mt19937>
-requires std::totally_ordered<Fitness>
+template <
+    typename Sequence, 
+    typename Fitness, 
+    typename Compare = std::ranges::greater,
+    std::uniform_random_bit_generator URBG = std::mt19937
+>
+requires (
+    std::totally_ordered<Fitness> &&
+    std::strict_weak_order<Compare, Fitness, Fitness>
+)
 class GeneticAlgorithm
 {
 public:
@@ -64,7 +73,10 @@ public:
         Config config,
         URBG randomEngine = URBG ( std::move(Random::generateMtEngine()) )
     )
-        : m_evaluator { evaluationFunction, config.eliteCount }
+        : m_evaluator { 
+            evaluationFunction, 
+            config.eliteCount 
+        }
         , m_config { config }
         , m_populator { 
             detail::Populator<Sequence> {
@@ -136,6 +148,7 @@ public:
 
         initializePopulation(population);
         evaluateCurrentGeneration();
+        m_bestSolution = m_currentPopulation.front();
         
         // Begin GA loop
         while (!options.terminator(createTerminationContext()))
@@ -172,7 +185,8 @@ private:
 
     const Config m_config;
     const detail::Populator<Sequence> m_populator;
-    detail::Evaluator<Sequence, Fitness> m_evaluator;
+    detail::Evaluator<Sequence, Fitness, Compare> m_evaluator;
+    Compare m_compare {};
     detail::Selector<Sequence, Fitness> m_selector;
     Random m_rng {};
 
@@ -223,7 +237,7 @@ private:
     {
         m_evaluator.evaluate(m_currentPopulation);
 
-        if (m_currentPopulation.front().fitness > m_bestSolution.fitness)
+        if (m_compare(m_currentPopulation.front().fitness, m_bestSolution.fitness))
             m_bestSolution = m_currentPopulation.front();
     }
     
@@ -249,11 +263,6 @@ private:
         return m_rng.getIntegerExclude<std::size_t>(0, m_config.populationSize - 1, omit);
     }
 };
-
-
-// Deduction Guide:
-template <typename Sequence, typename Fitness, typename URBG>
-GeneticAlgorithm(std::function<Fitness(const Sequence&)>, Operators<Sequence>, Config, URBG) -> GeneticAlgorithm<Sequence, Fitness, URBG>;
 
 }
 

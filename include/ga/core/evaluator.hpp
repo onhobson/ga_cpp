@@ -14,16 +14,21 @@ namespace ga::detail
 
 /**
  * @brief A class that evaluates the fitness of a population of chromosomes using the given evaluation function.
+ * 
  * @tparam Sequence The type of the sequences in the chromosomes.
  * @tparam Fitness The type returned by the evaluation function.
+ * @tparam Compare A comparison function object that defines the ordering of fitness values.
  */
-template <typename Sequence, typename Fitness>
+template <typename Sequence, typename Fitness, typename Compare>
 class Evaluator
 {
 public:
     using Chromosome = ga::Chromosome<Sequence, Fitness>;
     
-    Evaluator(std::function<Fitness(const Sequence&)> evaluate, std::size_t eliteCount)
+    Evaluator(
+        std::function<Fitness(const Sequence&)> evaluate, 
+        std::size_t eliteCount
+    )
         : m_evaluate { evaluate }
         , m_eliteCount { (eliteCount) ? eliteCount : 1 } // Upgrade eliteCount of 0 to 1 to allow GA to track top fitness using .front()
     { }
@@ -41,11 +46,12 @@ public:
         }
 
         const auto eliteEnd = population.begin() + std::min(m_eliteCount, population.size());
-        std::ranges::partial_sort(population, eliteEnd, std::ranges::greater{}, &Chromosome::fitness);
+        std::ranges::partial_sort(population, eliteEnd, m_compare, &Chromosome::fitness);
     }
 
 private:
     std::function<Fitness(const Sequence&)> m_evaluate;
+    Compare m_compare {};
 
     std::size_t m_eliteCount;
 };

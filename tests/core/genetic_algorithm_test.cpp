@@ -134,7 +134,7 @@ TEST_F(GeneticAlgorithmTest, RunReturnsTopChromosome)
     operators.mutate = {
         [](const Sequence& seq, ga::Random&)
         {
-            return Sequence { seq.front() - 1 };
+            return Sequence { seq.front() + 1 };
         }
     };
     

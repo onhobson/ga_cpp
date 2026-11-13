@@ -119,14 +119,14 @@ struct GenerationLimit
  * 
  * @tparam Fitness The type of the fitness value used in the genetic algorithm.
  */
-template <typename Fitness>
+template <typename Fitness, typename Compare = std::ranges::less_equal>
 struct FitnessThreshold
 {
     Fitness threshold;
 
     bool operator()(const context::TerminationContext<Fitness>& context) const
     {
-        return context.bestFitness >= threshold;
+        return Compare{}(context.bestFitness, threshold);
     }
 };
 
@@ -139,7 +139,7 @@ struct FitnessThreshold
  * @param limit The number of generations to wait for an improvement before terminating.
  * @param margin An optional margin that defines the minimum improvement required to reset the stagnation counter. If not provided, any improvement will reset the counter.
  */
-template <typename Fitness, typename Compare = std::ranges::greater>
+template <typename Fitness, typename Compare = std::ranges::less>
 class StagnationLimit
 {
 public:

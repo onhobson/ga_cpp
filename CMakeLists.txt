@@ -69,12 +69,7 @@ install(FILES
 # Tests
 # --------------------------------------------------
 
-
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-    option(BUILD_TESTS "Build the tests" ON)
-else()
-    option(BUILD_TESTS "Build the tests" OFF)
-endif()
+option(BUILD_TESTS "Build the tests" OFF)
 
 if(BUILD_TESTS)
     enable_testing()

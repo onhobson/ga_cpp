@@ -59,7 +59,7 @@ namespace
         Sequence baseSequence(20);
         std::ranges::iota(baseSequence, 0);
 
-        ga::GeneticAlgorithm<Sequence, int> ga {
+        ga::GeneticAlgorithm<Sequence, int, std::greater<int>> ga {
             evalFunction,
             ga::prebuilt::permutationOperators<Sequence>(),
             ga::Config {}

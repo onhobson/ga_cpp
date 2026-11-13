@@ -46,7 +46,7 @@ namespace ga
 template <
     typename Sequence, 
     typename Fitness, 
-    typename Compare = std::ranges::greater,
+    typename Compare = std::ranges::less,
     std::uniform_random_bit_generator URBG = std::mt19937
 >
 requires (

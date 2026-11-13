@@ -20,7 +20,7 @@ namespace
         {
             [](const Sequence& parent, ga::Random&)
             {
-                return Sequence { parent + 1 };
+                return Sequence { parent - 1 };
             }
         }
     };
@@ -50,7 +50,7 @@ namespace
     template <typename Term>
     void validateTerminatorInput(Term&& term, std::size_t expected = 0)
     {
-        Sequence baseSequence { 0 };
+        Sequence baseSequence { 100 };
 
         ga::GeneticAlgorithm<Sequence, int> ga {
             evalFunction,
@@ -83,7 +83,7 @@ namespace
         }
 
         EXPECT_NE(elite.sequence, baseSequence);
-        EXPECT_GT(elite.fitness, 0);
+        EXPECT_LT(elite.fitness, 100);
     }
 }
 
@@ -105,7 +105,7 @@ TEST(EndToEndTest, CustomTerminatorMultiLayered)
     ga::terminate::TerminationPolicy policy {
         10000,
         ga::terminate::AllOf {
-            ga::terminate::FitnessThreshold<int> { 100 },
+            ga::terminate::FitnessThreshold<int> { 0 },
             ga::terminate::AnyOf {
                 ga::terminate::GenerationLimit { 200 },
                 ga::terminate::StagnationLimit<int> { 10 }

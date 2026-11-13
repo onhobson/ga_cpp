@@ -148,9 +148,9 @@ TEST_F(GeneticAlgorithmTest, RunReturnsTopChromosome)
             config
         };
 
-        Chromosome result = ga.run(baseSequence, options);
+        ga::Result result = ga.run(baseSequence, options);
 
-        EXPECT_EQ(result.sequence, baseSequence);
-        EXPECT_EQ(result.fitness, evalFunction(baseSequence));
+        EXPECT_EQ(result.best.sequence, baseSequence);
+        EXPECT_EQ(result.best.fitness, evalFunction(baseSequence));
     }
 }

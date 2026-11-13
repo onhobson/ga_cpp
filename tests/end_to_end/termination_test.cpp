@@ -58,14 +58,14 @@ namespace
             config
         };
 
-        ga::Chromosome<Sequence, int> elite;
+        ga::Result<Sequence, int> result;
 
         if constexpr (std::is_same_v<std::remove_reference_t<Term>, std::nullptr_t>)
         {
             ga::RunOptions options {
                 .initializer = initFunc
             };
-            elite = ga.run(baseSequence, options);
+            result = ga.run(baseSequence, options);
         }
         else
         {
@@ -77,13 +77,13 @@ namespace
                 .callback = cb
             };
 
-            elite = ga.run(baseSequence, options);
+            result = ga.run(baseSequence, options);
 
             EXPECT_EQ(expected, cb.count);
         }
 
-        EXPECT_NE(elite.sequence, baseSequence);
-        EXPECT_LT(elite.fitness, 100);
+        EXPECT_NE(result.best.sequence, baseSequence);
+        EXPECT_LT(result.best.fitness, 100);
     }
 }
 

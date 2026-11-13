@@ -64,10 +64,10 @@ namespace
             ga::Config {}
         };
 
-        ga::Chromosome elite { ga.run(baseSequence, ga::RunOptions{}) };
+        ga::Result result { ga.run(baseSequence, ga::RunOptions{}) };
 
-        EXPECT_NE(elite.sequence, baseSequence);
-        EXPECT_GT(elite.fitness, 0);
+        EXPECT_NE(result.best.sequence, baseSequence);
+        EXPECT_GT(result.best.fitness, 0);
     }
 }
 

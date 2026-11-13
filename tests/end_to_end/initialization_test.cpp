@@ -65,23 +65,23 @@ namespace
             ga::Config {}
         };
 
-        ga::Chromosome<Sequence, int> elite;
+        ga::Result<Sequence, int> result;
 
         if constexpr (std::is_same_v<std::remove_reference_t<Init>, std::nullptr_t>)
         {
             ga::RunOptions options {};
-            elite = ga.run(baseSequence, options);
+            result = ga.run(baseSequence, options);
         }
         else
         {
             ga::RunOptions options {
                 .initializer = std::forward<Init>(init)
             };
-            elite = ga.run(baseSequence, options);
+            result = ga.run(baseSequence, options);
         }
 
-        EXPECT_NE(elite.sequence, baseSequence);
-        EXPECT_GT(elite.fitness, 0);
+        EXPECT_NE(result.best.sequence, baseSequence);
+        EXPECT_GT(result.best.fitness, 0);
     }
 }
 

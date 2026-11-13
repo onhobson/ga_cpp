@@ -14,6 +14,7 @@
 #include "ga/core/evaluator.hpp"
 #include "ga/core/populator.hpp"
 #include "ga/core/selector.hpp"
+#include "ga/core/result.hpp"
 
 #include "ga/operations/crossover.hpp"
 #include "ga/operations/operators.hpp"
@@ -107,7 +108,7 @@ public:
         constraints::TerminationCondition<Terminator, Fitness> &&
         constraints::CallbackFunction<Callback, Sequence, Fitness>
     )
-    Chromosome run(
+    Result<Sequence, Fitness> run(
         const Sequence& baseSequence,
         RunOptions<Initializer, Terminator, Callback> options
     ) { 
@@ -123,14 +124,14 @@ public:
      * @param population The initial population of Sequences to evolve.
      * @param options A `ga::RunOptions` object containing the initializer, terminator, and callback functions to use during the run.
      * 
-     * @return The best `Chromosome` found after running the genetic algorithm for the specified number of generations.
+     * @return A `ga::Result` object containing the best `Chromosome` found and the number of generations processed.
      */
     template <typename Initializer, typename Terminator, typename Callback>
     requires (
         constraints::TerminationCondition<Terminator, Fitness> &&
         constraints::CallbackFunction<Callback, Sequence, Fitness>
     )
-    Chromosome run(
+    Result<Sequence, Fitness> run(
         const std::vector<Sequence>& population, 
         RunOptions<Initializer, Terminator, Callback> options
     ) {
@@ -169,7 +170,10 @@ public:
             }
         } 
 
-        return m_bestSolution;
+        return Result {
+            .best = m_bestSolution,
+            .generation = m_generationCount
+        };
     }
 
 private:

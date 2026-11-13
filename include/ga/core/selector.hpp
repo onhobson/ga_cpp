@@ -13,7 +13,7 @@ namespace ga::detail
 /**
  * @brief Handles tournament selection logic for selecting chromosomes from a population.
  */
-template <typename Sequence, typename Fitness>
+template <typename Sequence, typename Fitness, typename Compare>
 class Selector
 {
     using Chromosome = ga::Chromosome<Sequence, Fitness>;
@@ -79,9 +79,9 @@ public:
             }
 
             // Select highest fitness sample
-            chosen[choose] = std::ranges::max(
+            chosen[choose] = std::ranges::min(
                 samples, 
-                {}, 
+                m_compare, 
                 [&population](const auto& index)
                     {
                         return population[index].fitness;
@@ -94,6 +94,7 @@ public:
 
 private:
     std::size_t m_tournamentSize {};
+    Compare m_compare {};
     Random& m_rng;
 };
 

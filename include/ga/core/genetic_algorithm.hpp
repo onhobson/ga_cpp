@@ -78,18 +78,16 @@ public:
             config.eliteCount 
         }
         , m_config { config }
-        , m_populator { 
-            detail::Populator<Sequence> {
-                operators.crossover, 
-                operators.mutate,
-                config.crossoverRate
-            }}
+        , m_populator {
+            operators.crossover, 
+            operators.mutate,
+            config.crossoverRate
+        }
         , m_rng { Random(randomEngine) }
         , m_selector { 
-            detail::Selector<Sequence, Fitness> { 
-                m_config.tournamentSize, 
-                m_rng 
-            }}
+            m_config.tournamentSize, 
+            m_rng 
+        }
     { 
         m_config.validate();
     } 
@@ -187,7 +185,7 @@ private:
     const detail::Populator<Sequence> m_populator;
     detail::Evaluator<Sequence, Fitness, Compare> m_evaluator;
     Compare m_compare {};
-    detail::Selector<Sequence, Fitness> m_selector;
+    detail::Selector<Sequence, Fitness, Compare> m_selector;
     Random m_rng {};
 
     // Constructs Chromosomes out of each member in population with default Fitness

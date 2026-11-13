@@ -12,7 +12,7 @@ TEST(SelectorTest, SelectsTwoUniqueChromosomesFromPopulation)
     {
         SCOPED_TRACE("tournamentSize=" + std::to_string(tournamentSize));
 
-        ga::detail::Selector<int, int> selector { tournamentSize, rng };
+        ga::detail::Selector<int, int, std::ranges::less> selector { tournamentSize, rng };
 
         for (std::size_t populationSize : { 2, 3, 4, 5 })
         {
@@ -38,7 +38,7 @@ TEST(SelectorTest, SelectsTwoSameChromosomesFromSinglePopulation)
     {
         SCOPED_TRACE("tournamentSize=" + std::to_string(tournamentSize));
 
-        ga::detail::Selector<int, int> selector { tournamentSize, rng };
+        ga::detail::Selector<int, int, std::ranges::less> selector { tournamentSize, rng };
 
         std::vector<ga::Chromosome<int, int>> population;
 
@@ -58,7 +58,7 @@ TEST(SelectorTest, SelectsTwoUniqueChromosomesFromLargePopulation)
     {
         SCOPED_TRACE("tournamentSize=" + std::to_string(tournamentSize));
 
-        ga::detail::Selector<int, int> selector { tournamentSize, rng };
+        ga::detail::Selector<int, int, std::ranges::less> selector { tournamentSize, rng };
 
         for (std::size_t populationSize : { 20, 40, 80, 100 })
         {
@@ -80,7 +80,7 @@ TEST(SelectorTest, SelectSamplesEvenlyFromPopulation)
 {
     ga::Random rng { ga::Random::generateMtEngine() };
 
-    ga::detail::Selector<int, int> selector { 1, rng };
+    ga::detail::Selector<int, int, std::ranges::less> selector { 1, rng };
 
     constexpr std::size_t numSelections { 10'000 };
     constexpr std::size_t popSize { 30 };
@@ -104,4 +104,42 @@ TEST(SelectorTest, SelectSamplesEvenlyFromPopulation)
     { 
         EXPECT_NEAR(count, expectedCount, 0.01 * numSelections); // Expect roughly uniform distribution
     }
+}
+
+TEST(SelectorTest, DifferentCompareTypesChangeSelection)
+{
+    ga::Random rng { ga::Random::generateMtEngine() };
+    constexpr std::size_t populationSize { 10 };
+
+    ga::detail::Selector<int, int, std::ranges::less> lessSelector { populationSize, rng };
+    ga::detail::Selector<int, int, std::ranges::greater> greaterSelector { populationSize, rng };
+
+    std::vector<ga::Chromosome<int, int>> population;
+
+    for (std::size_t i { 0 }; i < populationSize; ++i)
+        population.emplace_back(ga::Chromosome<int, int> { static_cast<int>(i), static_cast<int>(i) });
+
+    auto [lessFirst, lessSecond] = lessSelector.select(population);
+    auto [greaterFirst, greaterSecond] = greaterSelector.select(population);
+
+    EXPECT_NE(&lessFirst, &greaterFirst);
+    EXPECT_NE(&lessSecond, &greaterSecond);
+}
+
+TEST(SelectorTest, GreaterSelectorSelectsGreatestFitness)
+{
+    ga::Random rng { ga::Random::generateMtEngine() };
+    constexpr std::size_t populationSize { 10 };
+
+    ga::detail::Selector<int, int, std::ranges::greater> selector { populationSize, rng };
+
+    std::vector<ga::Chromosome<int, int>> population;
+
+    for (std::size_t i { 0 }; i < populationSize; ++i)
+        population.emplace_back(ga::Chromosome<int, int> { static_cast<int>(i), static_cast<int>(i) });
+
+    auto [first, second] = selector.select(population);
+
+    EXPECT_EQ(first.fitness, 9);
+    EXPECT_EQ(second.fitness, 8);
 }

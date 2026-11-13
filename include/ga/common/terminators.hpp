@@ -6,6 +6,15 @@
 
 #include <optional>
 
+namespace // Helpers
+{
+    template <typename T>
+    T diff(T a, T b)
+    {
+        return (a > b) ? (a - b) : (b - a);
+    }
+}
+
 namespace ga::terminate
 {
 
@@ -124,11 +133,12 @@ struct FitnessThreshold
  * @brief A terminator that returns true if the best fitness value has not improved for a specified number of generations.
  * 
  * @tparam Fitness The type of the fitness value used in the genetic algorithm.
+ * @tparam Compare A comparison function object that defines the ordering of fitness values. Defaults to `std::ranges::greater`.
  * 
  * @param limit The number of generations to wait for an improvement before terminating.
  * @param margin An optional margin that defines the minimum improvement required to reset the stagnation counter. If not provided, any improvement will reset the counter.
  */
-template <typename Fitness>
+template <typename Fitness, typename Compare = std::ranges::greater>
 class StagnationLimit
 {
 public:
@@ -143,14 +153,20 @@ public:
 
     bool operator()(const context::TerminationContext<Fitness>& context)
     {
-        if ((m_margin.has_value() && (context.bestFitness - m_previousBest) >= m_margin.value()) || // Fitness improvement meets margin req
-            (!m_margin.has_value() && context.bestFitness > m_previousBest)) // No margin req, fitness is improved
+        if (!m_previousBest.has_value()) // First context seen
+        {
+            m_previousBest = context.bestFitness;
+            return false;
+        }
+
+        if (m_compare(context.bestFitness, m_previousBest.value()) && // Is improvement
+           (diff<Fitness>(context.bestFitness, m_previousBest.value()) >= m_margin)) // Is greater than margin
         {
             // New best, reset stagnation
             m_stagnantGenerations = 0;
             m_previousBest = context.bestFitness;
             return false;
-        } 
+        }
         else
         {
             return ++m_stagnantGenerations > m_limit; 
@@ -159,9 +175,10 @@ public:
 
 private:
     std::size_t m_limit;
-    std::optional<Fitness> m_margin;
+    Fitness m_margin {};
     std::size_t m_stagnantGenerations {};
-    Fitness m_previousBest {};
+    std::optional<Fitness> m_previousBest;
+    Compare m_compare {};
 };
 
 #pragma endregion COMPOSITIONS

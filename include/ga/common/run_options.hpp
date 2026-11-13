@@ -17,13 +17,13 @@ namespace ga
  */
 template <
     typename Initializer = init::RandomPermutation, 
-    typename Terminator = terminate::TerminationPolicy<>, 
+    typename Condition = terminate::NoOpTerminator, 
     typename Callback = callback::NoOpCallback
 >
 struct RunOptions
 {
     Initializer initializer {};
-    Terminator terminator {};
+    terminate::TerminationPolicy<Condition> terminator {};
     Callback& callback { callback::defaultCallback };
 };
 

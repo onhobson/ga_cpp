@@ -88,6 +88,28 @@ TEST(StagnationLimitTest, ResetsWhenFitnessImprovementMeetsMargin)
     EXPECT_TRUE(terminator(Context<int> { 5, 12 }));
 }
 
+TEST(StagnationLimitTest, CompareLessThanCanBeUsedToTrackDecreasingFitness)
+{
+    ga::terminate::StagnationLimit<int, std::ranges::less> terminator { 2 };
+
+    EXPECT_FALSE(terminator(Context<int> { 0, 10 }));
+    EXPECT_FALSE(terminator(Context<int> { 1, 10 }));
+    EXPECT_FALSE(terminator(Context<int> { 2, 10 }));
+    EXPECT_TRUE(terminator(Context<int> { 3, 10 }));
+}
+
+TEST(StagnationLimitTest, CompareLessThanWithMarginCanBeUsedToTrackDecreasingFitness)
+{
+    ga::terminate::StagnationLimit<int, std::ranges::less> terminator { 2, 2 };
+
+    EXPECT_FALSE(terminator(Context<int> { 0, 10 }));
+    EXPECT_FALSE(terminator(Context<int> { 1, 9 }));
+    EXPECT_FALSE(terminator(Context<int> { 2, 8 }));
+    EXPECT_FALSE(terminator(Context<int> { 3, 8 }));
+    EXPECT_FALSE(terminator(Context<int> { 4, 8 }));
+    EXPECT_TRUE(terminator(Context<int> { 5, 8 }));
+}
+
 TEST(AnyOfTest, SupportsOneCondition)
 {
     ga::terminate::AnyOf terminator {

@@ -6,7 +6,11 @@
 
 #include <optional>
 
-namespace // Helpers
+
+namespace ga::terminate
+{
+
+namespace detail
 {
     template <typename T>
     T diff(T a, T b)
@@ -14,9 +18,6 @@ namespace // Helpers
         return (a > b) ? (a - b) : (b - a);
     }
 }
-
-namespace ga::terminate
-{
 
 /**
  * @brief A no-operation terminator that always returns false.
@@ -160,7 +161,7 @@ public:
         }
 
         if (m_compare(context.bestFitness, m_previousBest.value()) && // Is improvement
-           (diff<Fitness>(context.bestFitness, m_previousBest.value()) >= m_margin)) // Is greater than margin
+           (detail::diff<Fitness>(context.bestFitness, m_previousBest.value()) >= m_margin)) // Is greater than margin
         {
             // New best, reset stagnation
             m_stagnantGenerations = 0;

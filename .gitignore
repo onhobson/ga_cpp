@@ -1,8 +1,8 @@
 /docs/html
 /docs/latex
 TODO.md
-Workflow.md
-Architecture.md
+
+.vscode/
 
 # Prerequisites
 *.d

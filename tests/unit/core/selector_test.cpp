@@ -1,5 +1,5 @@
-#include "ga/core/selector.hpp"
 #include "ga/core/chromosome.hpp"
+#include "ga/core/selector.hpp"
 
 #include <gtest/gtest.h>
  

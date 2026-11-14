@@ -1,5 +1,6 @@
-#include "ga/operations/functions/mutate/permutation.hpp"
-#include "ga/common/random.hpp"
+#include "ga/builtins/operators/mutate_permutation.hpp"
+
+#include "ga/utility/random.hpp"
 
 #include "helpers.hpp"
 
@@ -68,7 +69,7 @@ TEST(InversionMutationTest, ReturnsValidPermutation)
         auto rng { makeRandom(seed) };
         
         std::ranges::shuffle(parent, rng.getEngine());
-        const auto child { ga::functions::mutate::inversion(parent, rng) };
+        const auto child { ga::mutate_op::inversion(parent, rng) };
         
         ASSERT_EQ(parent.size(), child.size());
         expectPermutationOf(parent, child);
@@ -84,7 +85,7 @@ TEST(InversionMutationTest, PerformsInversionCorrectly)
     {
         auto rng { makeRandom(seed) };
 
-        const auto child { ga::functions::mutate::inversion(parent, rng) };
+        const auto child { ga::mutate_op::inversion(parent, rng) };
 
         ASSERT_EQ(parent.size(), child.size());
         validateInversionOperation(child);
@@ -96,8 +97,8 @@ TEST(InversionMutationTest, WorksWithDifferentContainerTypes)
     std::array<int, 10> arr { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     std::string str { "BIGol'String" };
 
-    outputsPermutation<std::array<int, 10>>(arr, ga::functions::mutate::inversion<std::array<int, 10>>);
-    outputsPermutation<std::string>(str, ga::functions::mutate::inversion<std::string>);
+    outputsPermutation<std::array<int, 10>>(arr, ga::mutate_op::inversion<std::array<int, 10>>);
+    outputsPermutation<std::string>(str, ga::mutate_op::inversion<std::string>);
 }
 
 TEST(InversionMutationTest, InvalidInputThrows)
@@ -105,8 +106,8 @@ TEST(InversionMutationTest, InvalidInputThrows)
     ga::Random rng { ga::Random::generateMtEngine() };
 
     std::vector<int> parent {};
-    EXPECT_THROW(ga::functions::mutate::inversion(parent, rng), std::invalid_argument);
+    EXPECT_THROW(ga::mutate_op::inversion(parent, rng), std::invalid_argument);
 
     parent.push_back(1);
-    EXPECT_THROW(ga::functions::mutate::inversion(parent, rng), std::invalid_argument);
+    EXPECT_THROW(ga::mutate_op::inversion(parent, rng), std::invalid_argument);
 }

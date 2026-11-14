@@ -1,4 +1,5 @@
 #include "ga/core/populator.hpp"
+
 #include "ga/operations/crossover.hpp"
 #include "ga/operations/mutate.hpp"
 

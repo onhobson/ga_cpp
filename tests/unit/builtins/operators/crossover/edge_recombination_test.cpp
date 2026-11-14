@@ -1,5 +1,6 @@
-#include "ga/operations/functions/crossover/permutation.hpp"
-#include "ga/common/random.hpp"
+#include "ga/builtins/operators/crossover_permutation.hpp"
+
+#include "ga/utility/random.hpp"
 
 #include "helpers.hpp"
 
@@ -108,7 +109,7 @@ TEST(EdgeRecombinationTest, ReturnsAValidPermutation)
         std::shuffle(parent1.begin(), parent1.end(), rng.getEngine());
         std::shuffle(parent2.begin(), parent2.end(), rng.getEngine());
 
-        const auto child { ga::functions::crossover::edgeRecombination(parent1, parent2, rng) };
+        const auto child { ga::crossover_op::edgeRecombination(parent1, parent2, rng) };
 
         ASSERT_EQ(child.size(), parent1.size()) << "seed: " << seed;
         EXPECT_EQ(child.front(), parent1.front()) << "seed: " << seed;
@@ -122,7 +123,7 @@ TEST(EdgeRecombinationTest, SupportsFixedSizeRanges)
     const std::array<int, 4> parent2 { 3, 1, 4, 2 };
     auto rng { makeRandom(4) };
 
-    const auto child { ga::functions::crossover::edgeRecombination(parent1, parent2, rng) };
+    const auto child { ga::crossover_op::edgeRecombination(parent1, parent2, rng) };
 
     expectPermutationOf(child, parent1);
 }
@@ -136,7 +137,7 @@ TEST(EdgeRecombinationTest, PreservesAvailableParentEdges)
     for (std::uint32_t seed { 0 }; seed < 64; ++seed)
     {
         auto rng { makeRandom(seed) };
-        const auto child { ga::functions::crossover::edgeRecombination(parent1, parent2, rng) };
+        const auto child { ga::crossover_op::edgeRecombination(parent1, parent2, rng) };
 
         EXPECT_TRUE(usesAvailableParentEdges(child, parent1, parent2)) << "seed: " << seed;
     }
@@ -151,7 +152,7 @@ TEST(EdgeRecombinationTest, ChoosesUniqueMinimumDegreeWraparoundNeighbor)
     for (std::uint32_t seed { 0 }; seed < 32; ++seed)
     {
         auto rng { makeRandom(seed) };
-        const auto child { ga::functions::crossover::edgeRecombination(parent1, parent2, rng) };
+        const auto child { ga::crossover_op::edgeRecombination(parent1, parent2, rng) };
 
         ASSERT_EQ(child.front(), 1);
         ASSERT_GE(child.size(), 2);
@@ -167,7 +168,7 @@ TEST(EdgeRecombinationTest, HandlesTiedMinimumDegreeNeighbors)
     for (std::uint32_t seed { 0 }; seed < 64; ++seed)
     {
         auto rng { makeRandom(seed) };
-        const auto child { ga::functions::crossover::edgeRecombination(parent, parent, rng) };
+        const auto child { ga::crossover_op::edgeRecombination(parent, parent, rng) };
 
         ASSERT_EQ(child.front(), parent.front());
         ASSERT_GE(child.size(), 2);
@@ -186,7 +187,7 @@ TEST(EdgeRecombinationTest, FallsBackWhenNoUnusedParentNeighborRemains)
     for (std::uint32_t seed { 0 }; seed < 128 && !fallbackObserved; ++seed)
     {
         auto rng { makeRandom(seed) };
-        const auto child { ga::functions::crossover::edgeRecombination(parent1, parent2, rng) };
+        const auto child { ga::crossover_op::edgeRecombination(parent1, parent2, rng) };
 
         fallbackObserved = containsFallbackTransition(child, parent1, parent2);
         EXPECT_EQ(child.size(), parent1.size()) << "seed: " << seed;
@@ -201,7 +202,7 @@ TEST(EdgeRecombinationTest, HandlesOneGenePermutation)
     const std::vector<int> parent { 42 };
     auto rng { makeRandom(1) };
 
-    const auto child { ga::functions::crossover::edgeRecombination(parent, parent, rng) };
+    const auto child { ga::crossover_op::edgeRecombination(parent, parent, rng) };
 
     EXPECT_EQ(child, parent);
 }
@@ -212,7 +213,7 @@ TEST(EdgeRecombinationTest, HandlesTwoGenePermutations)
     const std::vector<int> parent2 { 2, 1 };
     auto rng { makeRandom(2) };
 
-    const auto child { ga::functions::crossover::edgeRecombination(parent1, parent2, rng) };
+    const auto child { ga::crossover_op::edgeRecombination(parent1, parent2, rng) };
 
     EXPECT_EQ(child, parent1);
 }
@@ -222,7 +223,7 @@ TEST(EdgeRecombinationTest, HandlesIdenticalParents)
     const std::vector<int> parent { 1, 2, 3, 4, 5 };
     auto rng { makeRandom(3) };
 
-    const auto child { ga::functions::crossover::edgeRecombination(parent, parent, rng) };
+    const auto child { ga::crossover_op::edgeRecombination(parent, parent, rng) };
 
     ASSERT_EQ(child.front(), parent.front());
     ASSERT_EQ(child.size(), parent.size());
@@ -236,7 +237,7 @@ TEST(EdgeRecombinationTest, SupportsStringGenes)
     const std::vector<std::string> parent2 { "gamma", "alpha", "delta", "beta" };
     auto rng { makeRandom(4) };
 
-    const auto child { ga::functions::crossover::edgeRecombination(parent1, parent2, rng) };
+    const auto child { ga::crossover_op::edgeRecombination(parent1, parent2, rng) };
 
     ASSERT_EQ(child.size(), parent1.size());
     expectPermutationOf(child, parent1);
@@ -249,8 +250,8 @@ TEST(EdgeRecombinationTest, RejectsInvalidSequenceSizes)
     const std::vector<int> twoGenes { 1, 2 };
     const std::vector<int> threeGenes { 1, 2, 3 };
 
-    EXPECT_THROW(ga::functions::crossover::edgeRecombination(empty, empty, rng), std::invalid_argument);
-    EXPECT_THROW(ga::functions::crossover::edgeRecombination(twoGenes, threeGenes, rng), std::invalid_argument);
+    EXPECT_THROW(ga::crossover_op::edgeRecombination(empty, empty, rng), std::invalid_argument);
+    EXPECT_THROW(ga::crossover_op::edgeRecombination(twoGenes, threeGenes, rng), std::invalid_argument);
 }
 
 TEST(EdgeRecombinationTest, RejectsParentsWithDuplicateGenes)
@@ -260,8 +261,8 @@ TEST(EdgeRecombinationTest, RejectsParentsWithDuplicateGenes)
     const std::vector<int> duplicateFirst { 1, 1, 3 };
     const std::vector<int> duplicateSecond { 1, 2, 2 };
 
-    EXPECT_THROW(ga::functions::crossover::edgeRecombination(duplicateFirst, valid, rng), std::invalid_argument);
-    EXPECT_THROW(ga::functions::crossover::edgeRecombination(valid, duplicateSecond, rng), std::invalid_argument);
+    EXPECT_THROW(ga::crossover_op::edgeRecombination(duplicateFirst, valid, rng), std::invalid_argument);
+    EXPECT_THROW(ga::crossover_op::edgeRecombination(valid, duplicateSecond, rng), std::invalid_argument);
 }
 
 TEST(EdgeRecombinationTest, RejectsParentsWithDifferentGeneSets)
@@ -270,5 +271,5 @@ TEST(EdgeRecombinationTest, RejectsParentsWithDifferentGeneSets)
     const std::vector<int> parent2 { 1, 2, 3, 5 };
     auto rng { makeRandom(7) };
 
-    EXPECT_THROW(ga::functions::crossover::edgeRecombination(parent1, parent2, rng), std::invalid_argument);
+    EXPECT_THROW(ga::crossover_op::edgeRecombination(parent1, parent2, rng), std::invalid_argument);
 }

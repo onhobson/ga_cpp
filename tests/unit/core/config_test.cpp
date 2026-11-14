@@ -1,6 +1,7 @@
+#include "ga/builtins/operators/operator_sets.hpp"
+
 #include "ga/core/config.hpp"
 #include "ga/core/genetic_algorithm.hpp"
-#include "ga/operations/functions/bundles.hpp"
 
 #include <gtest/gtest.h>
 
@@ -17,7 +18,7 @@ std::function<int(const std::vector<int>&)> evalFunc = [](const std::vector<int>
 {
     return seq.front();
 };
-ga::Operators<std::vector<int>> operators { ga::prebuilt::permutationOperators<std::vector<int>>() };
+ga::Operators<std::vector<int>> operators { ga::op_set::permutationOperators<std::vector<int>>() };
 
 
 TEST(ConfigValidationTest, PopulationSizeOfZeroThrows)

@@ -1,4 +1,4 @@
-#include "ga/common/terminators.hpp"
+#include "ga/builtins/terminators.hpp"
 
 #include <gtest/gtest.h>
 

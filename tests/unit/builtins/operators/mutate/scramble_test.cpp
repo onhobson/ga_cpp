@@ -1,5 +1,6 @@
-#include "ga/operations/functions/mutate/permutation.hpp"
-#include "ga/common/random.hpp"
+#include "ga/builtins/operators/mutate_permutation.hpp"
+
+#include "ga/utility/random.hpp"
 
 #include "helpers.hpp"
 
@@ -72,7 +73,7 @@ TEST(ScrambleMutationTest, ReturnsValidPermutation)
         auto rng { makeRandom(seed) };
         
         std::ranges::shuffle(parent, rng.getEngine());
-        const auto child { ga::functions::mutate::scramble(parent, rng) };
+        const auto child { ga::mutate_op::scramble(parent, rng) };
         
         ASSERT_EQ(parent.size(), child.size());
         expectPermutationOf(parent, child);
@@ -88,7 +89,7 @@ TEST(ScrambleMutationTest, PerformsScrambleCorrectly)
     {
         auto rng { makeRandom(seed) };
 
-        const auto child { ga::functions::mutate::scramble(parent, rng) };
+        const auto child { ga::mutate_op::scramble(parent, rng) };
 
         ASSERT_EQ(parent.size(), child.size());
         validateScrambleOperation(child);
@@ -101,8 +102,8 @@ TEST(ScrambleMutationTest, WorksWithDifferentContainerTypes)
     std::ranges::iota(arr, 0);
     std::string str { "BIGol'String" };
 
-    outputsPermutation<std::array<int, 16>>(arr, ga::functions::mutate::scramble<std::array<int, 16>>);
-    outputsPermutation<std::string>(str, ga::functions::mutate::scramble<std::string>);
+    outputsPermutation<std::array<int, 16>>(arr, ga::mutate_op::scramble<std::array<int, 16>>);
+    outputsPermutation<std::string>(str, ga::mutate_op::scramble<std::string>);
 }
 
 TEST(ScrambleMutationTest, InvalidInputThrows)
@@ -110,9 +111,9 @@ TEST(ScrambleMutationTest, InvalidInputThrows)
     ga::Random rng { ga::Random::generateMtEngine() };
 
     std::vector<int> parent {};
-    EXPECT_THROW(ga::functions::mutate::scramble(parent, rng), std::invalid_argument);
+    EXPECT_THROW(ga::mutate_op::scramble(parent, rng), std::invalid_argument);
 
     parent.push_back(1);
-    EXPECT_THROW(ga::functions::mutate::scramble(parent, rng), std::invalid_argument);
+    EXPECT_THROW(ga::mutate_op::scramble(parent, rng), std::invalid_argument);
 }
 

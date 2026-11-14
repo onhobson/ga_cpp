@@ -1,4 +1,4 @@
-#include "ga/common/constraints.hpp"
+#include "ga/utility/constraints.hpp"
 
 #include <gtest/gtest.h>
 

@@ -1,5 +1,6 @@
-#include "ga/common/random.hpp"
 #include "ga/operations/operator_selector.hpp"
+
+#include "ga/utility/random.hpp"
 
 #include <gtest/gtest.h>
 

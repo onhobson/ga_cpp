@@ -61,7 +61,7 @@ namespace
 
         ga::GeneticAlgorithm<Sequence, int, std::greater<int>> ga {
             evalFunction,
-            ga::prebuilt::permutationOperators<Sequence>(),
+            ga::op_set::permutationOperators<Sequence>(),
             ga::Config {}
         };
 

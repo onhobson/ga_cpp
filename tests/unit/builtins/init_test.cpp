@@ -1,4 +1,4 @@
-#include "ga/common/initializers.hpp"
+#include "ga/builtins/initializers.hpp"
 
 #include "helpers.hpp"
 

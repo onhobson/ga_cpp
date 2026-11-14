@@ -29,7 +29,7 @@ TEST(EndToEndTest, BasicUsage)
 
     ga::GeneticAlgorithm<Sequence, int, std::greater<int>> ga {
         eval,
-        ga::prebuilt::permutationOperators<Sequence>(),
+        ga::op_set::permutationOperators<Sequence>(),
         ga::Config {}
     };
 

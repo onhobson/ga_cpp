@@ -1,16 +1,14 @@
-#ifndef GA_CROSSOVER_MISC_FUNCTIONS_HPP
-#define GA_CROSSOVER_MISC_FUNCTIONS_HPP
+#ifndef GA_BUILTINS_OPERATORS_CROSSOVER_MISC_HPP
+#define GA_BUILTINS_OPERATORS_CROSSOVER_MISC_HPP
 
-#include "ga/common/constraints.hpp"
-#include "ga/common/random.hpp"
-#include "ga/common/hash.hpp"
+#include "ga/utility/random.hpp"
 
 #include <algorithm>
-#include <vector>
 #include <unordered_set>
+#include <vector>
 
 
-namespace ga::functions::crossover
+namespace ga::crossover_op
 {
     /**
      * Performs a single-point crossover between two sequences, producing a new sequence that combines elements from both parents.

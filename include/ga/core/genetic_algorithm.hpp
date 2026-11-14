@@ -1,13 +1,9 @@
-#ifndef GA_GENETIC_ALGORITHM_HPP
-#define GA_GENETIC_ALGORITHM_HPP
+#ifndef GA_CORE_GENETIC_ALGORITHM_HPP
+#define GA_CORE_GENETIC_ALGORITHM_HPP
 
-#include "ga/common/callbacks.hpp"
-#include "ga/common/constraints.hpp"
-#include "ga/common/random.hpp"
-#include "ga/common/run_options.hpp"
-#include "ga/common/initializers.hpp"
-#include "ga/common/terminators.hpp"
-#include "ga/common/contexts.hpp"
+#include "ga/builtins/callbacks.hpp"
+#include "ga/builtins/initializers.hpp"
+#include "ga/builtins/terminators.hpp"
 
 #include "ga/core/chromosome.hpp"
 #include "ga/core/config.hpp"
@@ -20,15 +16,22 @@
 #include "ga/operations/operators.hpp"
 #include "ga/operations/mutate.hpp"
 
+#include "ga/types/contexts.hpp"
+#include "ga/types/run_options.hpp"
+
+#include "ga/utility/constraints.hpp"
+#include "ga/utility/random.hpp"
+
 #include <algorithm>
+#include <format>
+#include <functional>
 #include <iostream>
 #include <numeric>
-#include <vector>
-#include <utility>
-#include <functional>
 #include <queue>
 #include <random>
-#include <format>
+#include <utility>
+#include <vector>
+
 
 namespace ga
 {
@@ -100,7 +103,7 @@ public:
      * @param baseSequence The base sequence to use for initializing the population.
      * @param options A `ga::RunOptions` object containing the initializer, terminator, and callback functions to use during the run.
      * 
-     * @return The best `Chromosome` found after running the genetic algorithm for the specified number of generations.
+     * @return A `ga::Result` object containing the best `Chromosome` found and the number of generations processed.
      */
     template <typename Initializer, typename Terminator, typename Callback>
     requires (

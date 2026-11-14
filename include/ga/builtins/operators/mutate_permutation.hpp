@@ -1,17 +1,17 @@
-#ifndef GA_MUTATE_PERMUTATION_FUNCTIONS_HPP
-#define GA_MUTATE_PERMUTATION_FUNCTIONS_HPP
+#ifndef GA_BUILTINS_OPERATORS_MUTATE_PERMUTATION_HPP
+#define GA_BUILTINS_OPERATORS_MUTATE_PERMUTATION_HPP
 
-#include "ga/common/constraints.hpp"
-#include "ga/common/random.hpp"
-#include "ga/common/hash.hpp"
+#include "ga/utility/constraints.hpp"
+#include "ga/utility/hash.hpp"
+#include "ga/utility/random.hpp"
 
 #include <algorithm>
-#include <vector>
-#include <unordered_set>
 #include <ranges>
+#include <unordered_set>
+#include <vector>
 
 
-namespace ga::functions::mutate
+namespace ga::mutate_op
 {
     /**
      * @brief Randomly selects an element from the sequence and inserts it at a different position, shifting the other elements accordingly.

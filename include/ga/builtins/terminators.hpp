@@ -1,8 +1,9 @@
-#ifndef GA_COMMON_TERMINATORS_HPP
-#define GA_COMMON_TERMINATORS_HPP
+#ifndef GA_BUILTINS_TERMINATORS_HPP
+#define GA_BUILTINS_TERMINATORS_HPP
 
-#include "ga/common/constraints.hpp"
-#include "ga/common/contexts.hpp"
+#include "ga/types/contexts.hpp"
+
+#include "ga/utility/constraints.hpp"
 
 #include <optional>
 

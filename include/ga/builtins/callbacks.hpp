@@ -1,8 +1,6 @@
-#ifndef GA_COMMON_CALLBACKS_HPP
-#define GA_COMMON_CALLBACKS_HPP
+#ifndef GA_BUILTINS_CALLBACKS_HPP
+#define GA_BUILTINS_CALLBACKS_HPP
 
-#include <functional>
-#include <optional>
 
 namespace ga::callback
 {

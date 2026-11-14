@@ -1,17 +1,17 @@
-#ifndef GA_CROSSOVER_PERMUTATION_FUNCTIONS_HPP
-#define GA_CROSSOVER_PERMUTATION_FUNCTIONS_HPP
+#ifndef GA_BUILTINS_OPERATORS_CROSSOVER_PERMUTATION_HPP
+#define GA_BUILTINS_OPERATORS_CROSSOVER_PERMUTATION_HPP
 
-#include "ga/common/constraints.hpp"
-#include "ga/common/random.hpp"
-#include "ga/common/hash.hpp"
+#include "ga/utility/constraints.hpp"
+#include "ga/utility/hash.hpp"
+#include "ga/utility/random.hpp"
 
 #include <algorithm>
 #include <ranges>
-#include <vector>
 #include <unordered_set>
+#include <vector>
 
 
-namespace ga::functions::crossover
+namespace ga::crossover_op
 {
 
     /**

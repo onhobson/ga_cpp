@@ -1,11 +1,12 @@
 #ifndef GA_CORE_SELECTOR_HPP
 #define GA_CORE_SELECTOR_HPP
 
-#include "ga/common/random.hpp"
+#include "ga/utility/random.hpp"
 
 #include "ga/core/chromosome.hpp"
 
 #include <utility>
+
 
 namespace ga::detail
 {

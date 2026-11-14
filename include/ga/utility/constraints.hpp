@@ -1,11 +1,12 @@
-#ifndef GA_CONSTRAINTS_HPP
-#define GA_CONSTRAINTS_HPP
-
-#include "ga/common/contexts.hpp"
-#include "ga/common/random.hpp"
-#include "ga/common/hash.hpp"
+#ifndef GA_UTILITY_CONSTRAINTS_HPP
+#define GA_UTILITY_CONSTRAINTS_HPP
 
 #include "ga/core/chromosome.hpp"
+
+#include "ga/types/contexts.hpp"
+
+#include "ga/utility/random.hpp"
+#include "ga/utility/hash.hpp"
 
 #include <concepts>
 #include <ranges>

@@ -1,12 +1,13 @@
-#ifndef GA_CROSSOVER_HPP
-#define GA_CROSSOVER_HPP
+#ifndef GA_OPERATIONS_CROSSOVER_HPP
+#define GA_OPERATIONS_CROSSOVER_HPP
 
-#include "ga/common/random.hpp"
+#include "ga/utility/random.hpp"
 
 #include "ga/operations/operator_selector.hpp"
 
 #include <functional>
 #include <vector>
+
 
 namespace ga
 {

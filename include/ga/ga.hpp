@@ -3,16 +3,18 @@
 
 #include "ga/core/genetic_algorithm.hpp"
 
-#include "ga/common/random.hpp"
-#include "ga/common/contexts.hpp"
-#include "ga/common/initializers.hpp"
-#include "ga/common/terminators.hpp"
+#include "ga/builtins/initializers.hpp"
+#include "ga/builtins/terminators.hpp"
 
-#include "ga/operations/functions/crossover/misc.hpp"
-#include "ga/operations/functions/crossover/permutation.hpp"
+#include "ga/builtins/operators/crossover_misc.hpp"
+#include "ga/builtins/operators/crossover_permutation.hpp"
 
-#include "ga/operations/functions/mutate/permutation.hpp"
+#include "ga/builtins/operators/mutate_permutation.hpp"
 
-#include "ga/operations/functions/bundles.hpp"
+#include "ga/builtins/operators/operator_sets.hpp"
+
+#include "ga/utility/random.hpp"
+
+#include "ga/types/contexts.hpp"
 
 #endif  

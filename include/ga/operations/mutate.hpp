@@ -1,12 +1,13 @@
-#ifndef GA_MUTATE_HPP
-#define GA_MUTATE_HPP
+#ifndef GA_OPERATIONS_MUTATE_HPP
+#define GA_OPERATIONS_MUTATE_HPP
 
-#include "ga/common/random.hpp"
+#include "ga/utility/random.hpp"
 
 #include "ga/operations/operator_selector.hpp"
 
 #include <functional>
 #include <vector>
+
 
 namespace ga
 {

@@ -1,5 +1,6 @@
-#ifndef GA_CHROMOSOME_HPP
-#define GA_CHROMOSOME_HPP
+#ifndef GA_CORE_CHROMOSOME_HPP
+#define GA_CORE_CHROMOSOME_HPP
+
 
 namespace ga
 {

@@ -1,8 +1,8 @@
-#ifndef GA_COMMON_HASH_HPP
-#define GA_COMMON_HASH_HPP
-
+#ifndef GA_UTILITY_HASH_HPP
+#define GA_UTILITY_HASH_HPP
 
 #include <functional>
+
 
 namespace ga
 {

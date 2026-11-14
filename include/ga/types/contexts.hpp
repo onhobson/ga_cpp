@@ -1,9 +1,10 @@
-#ifndef GA_COMMON_CONTEXTS_HPP
-#define GA_COMMON_CONTEXTS_HPP
+#ifndef GA_TYPES_CONTEXTS_HPP
+#define GA_TYPES_CONTEXTS_HPP
 
 #include "ga/core/chromosome.hpp"
 
 #include <vector>
+
 
 namespace ga::context
 {

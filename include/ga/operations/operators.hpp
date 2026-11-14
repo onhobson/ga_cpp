@@ -1,8 +1,9 @@
-#ifndef GA_OPERATORS_HPP
-#define GA_OPERATORS_HPP
+#ifndef GA_OPERATIONS_OPERATORS_HPP
+#define GA_OPERATIONS_OPERATORS_HPP
 
 #include "ga/operations/crossover.hpp"
 #include "ga/operations/mutate.hpp"
+
 
 namespace ga
 {

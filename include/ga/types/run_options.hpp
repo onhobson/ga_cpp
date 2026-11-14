@@ -1,9 +1,10 @@
-#ifndef GA_COMMON_RUN_OPTIONS_HPP
-#define GA_COMMON_RUN_OPTIONS_HPP
+#ifndef GA_TYPES_RUN_OPTIONS_HPP
+#define GA_TYPES_RUN_OPTIONS_HPP
 
-#include "ga/common/callbacks.hpp"
-#include "ga/common/initializers.hpp"
-#include "ga/common/terminators.hpp"
+#include "ga/builtins/callbacks.hpp"
+#include "ga/builtins/initializers.hpp"
+#include "ga/builtins/terminators.hpp"
+
 
 namespace ga
 {

@@ -1,14 +1,15 @@
-#ifndef GA__OPERATORS_FUNCTIONS_BUNDLES_HPP
-#define GA__OPERATORS_FUNCTIONS_BUNDLES_HPP
+#ifndef GA_BUILTINS_OPERATOR_SETS_HPP
+#define GA_BUILTINS_OPERATOR_SETS_HPP
+
+#include "ga/builtins/operators/crossover_permutation.hpp"
+#include "ga/builtins/operators/mutate_permutation.hpp"
 
 #include "ga/operations/operators.hpp"
-#include "ga/common/constraints.hpp"
-#include "ga/operations/functions/crossover/permutation.hpp"
-#include "ga/operations/functions/mutate/permutation.hpp"
+
+#include "ga/utility/constraints.hpp"
 
 
-
-namespace ga::prebuilt
+namespace ga::op_set
 {
 
     /** @brief Builds Operator<Sequence> object initialized with prebuilt crossover and mutation functions for permutation sequences with equal probabilities.
@@ -27,18 +28,18 @@ namespace ga::prebuilt
         return Operators<Sequence> {
             Crossover<Sequence> {
                 {
-                    functions::crossover::alternatingEdge<Sequence>,
-                    functions::crossover::order<Sequence>,
-                    functions::crossover::edgeRecombination<Sequence>
+                    crossover_op::alternatingEdge<Sequence>,
+                    crossover_op::order<Sequence>,
+                    crossover_op::edgeRecombination<Sequence>
                 },
                 { 1.0, 1.0, 1.0, }
             },
             Mutate<Sequence> {
                 {
-                    functions::mutate::insert<Sequence>,
-                    functions::mutate::inversion<Sequence>,
-                    functions::mutate::scramble<Sequence>,
-                    functions::mutate::swap<Sequence>,
+                    mutate_op::insert<Sequence>,
+                    mutate_op::inversion<Sequence>,
+                    mutate_op::scramble<Sequence>,
+                    mutate_op::swap<Sequence>,
                 },
                 { 1.0, 1.0, 1.0, 1.0 }
             }

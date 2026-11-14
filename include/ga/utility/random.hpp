@@ -1,16 +1,17 @@
-#ifndef GA_RANDOM_HPP
-#define GA_RANDOM_HPP
+#ifndef GA_UTILITY_RANDOM_HPP
+#define GA_UTILITY_RANDOM_HPP
 
-#include <cstdint>
 #include <algorithm>
+#include <chrono>
+#include <concepts>
+#include <cstdint>
 #include <limits>
 #include <memory>
 #include <random>
 #include <stdexcept>
 #include <utility>
 #include <vector>
-#include <concepts>
-#include <chrono>
+
 
 namespace ga
 {

@@ -1,8 +1,9 @@
-#ifndef GA_COMMON_INITIALIZERS_HPP
-#define GA_COMMON_INITIALIZERS_HPP
+#ifndef GA_BUILTINS_INITIALIZERS_HPP
+#define GA_BUILTINS_INITIALIZERS_HPP
 
-#include "ga/common/constraints.hpp"
-#include "ga/common/random.hpp"
+#include "ga/utility/constraints.hpp"
+#include "ga/utility/random.hpp"
+
 
 namespace ga::init
 {

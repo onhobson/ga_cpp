@@ -1,12 +1,13 @@
-#ifndef GA_OPERATOR_SELECTOR_HPP
-#define GA_OPERATOR_SELECTOR_HPP
+#ifndef GA_OPERATIONS_OPERATOR_SELECTOR_HPP
+#define GA_OPERATIONS_OPERATOR_SELECTOR_HPP
 
-#include "ga/common/random.hpp"
+#include "ga/utility/random.hpp"
 
 #include <algorithm>
 #include <format>
-#include <vector>
 #include <random>
+#include <vector>
+
 
 namespace ga::detail
 {

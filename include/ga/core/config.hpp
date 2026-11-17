@@ -1,6 +1,7 @@
 #ifndef GA_CORE_CONFIG_HPP
 #define GA_CORE_CONFIG_HPP
 
+#include <cmath>
 #include <format>
 #include <stdexcept>
 #include <vector>
@@ -19,8 +20,8 @@ namespace ga
  * The complete configuration is validated when constructing
  * a GeneticAlgorithm instance.
  *
- * @note `eliteCount` must be less than `populationSize`.
- * @note `tournamentSize` must not exceed `populationSize`.
+ * @note `eliteCount` must be less than or equal to `populationSize`.
+ * @note `tournamentSize` must be less than or equal to `populationSize`.
  */
 struct Config
 {
@@ -29,7 +30,7 @@ struct Config
      *
      * @details
      * Must be greater than 1.
-     * Must be greater than eliteCount.
+     * Must be greater than or equal to eliteCount.
      */
     std::size_t populationSize { 30 };
 
@@ -37,7 +38,7 @@ struct Config
      * @brief Number of elite individuals preserved between generations.
      *
      * @details
-     * Must be less than populationSize.
+     * Must be less than or equal to populationSize.
      */
     std::size_t eliteCount { 3 };
 
@@ -45,7 +46,7 @@ struct Config
      * @brief Number of individuals competing in tournament selection.
      *
      * @details
-     * Must be less than populationSize.
+     * Must be less than or equal to populationSize.
      */
     std::size_t tournamentSize { 3 };
 
@@ -84,7 +85,7 @@ struct Config
             throw std::invalid_argument(std::format("Elite count can not be greater than population size: {} > {}", eliteCount, populationSize));
 
             
-        if (crossoverRate < 0 || crossoverRate > 1)
+        if (crossoverRate < 0 || crossoverRate > 1 || !std::isfinite(crossoverRate))
             throw std::invalid_argument("Crossover rate must be between 0 and 1");
 
 

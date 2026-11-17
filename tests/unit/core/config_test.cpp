@@ -121,3 +121,22 @@ TEST(ConfigValidationTest, CrossoverRateInsideOfBoundsDoesNotThrow)
         (ga::GeneticAlgorithm { evalFunc, operators, config })
     );
 }
+
+TEST(ConfigValidationTest, NaNAndInfCrossoverRateThrows)
+{
+    ga::Config config {
+        .crossoverRate { NAN }
+    };
+
+    EXPECT_THROW(
+        (ga::GeneticAlgorithm { evalFunc, operators, config }),
+        std::invalid_argument
+    );
+
+    config.crossoverRate = INFINITY;
+
+    EXPECT_THROW(
+        (ga::GeneticAlgorithm { evalFunc, operators, config }),
+        std::invalid_argument
+    );
+}

@@ -1,6 +1,6 @@
 # Library Definitions {#definitions}
 
-### @ref ga::Chromosome "Chromosome" {#chromosome}
+### Chromosome {#chromosome}
 
 An individual tracked by the genetic algorithm. A chromosome contains a @ref sequence "sequence" representing a candidate solution and its @ref fitness "fitness" value. The algorithm evaluates and ranks chromosomes as it evolves the @ref population "population".
 

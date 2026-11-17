@@ -90,10 +90,8 @@ int main()
     std::cout << '\n' << result.generation << " generations ran, best result:\n"
               << "Fitness: " << result.best.fitness << "\nSequence: ";
 
-    for (auto n : result.best.sequence)
-    {
-        std::cout << n << ' ';
-    }
+    for (auto city : result.best.sequence)
+        std::cout << city << ' ';
     std::cout << '\n';
 
     return 0;

@@ -1,7 +1,6 @@
 #ifndef GA_CORE_GENETIC_ALGORITHM_HPP
 #define GA_CORE_GENETIC_ALGORITHM_HPP
 
-#include "ga/builtins/callbacks.hpp"
 #include "ga/builtins/initializers.hpp"
 #include "ga/builtins/terminators.hpp"
 
@@ -22,14 +21,9 @@
 #include "ga/utility/constraints.hpp"
 #include "ga/utility/random.hpp"
 
-#include <algorithm>
 #include <format>
 #include <functional>
-#include <iostream>
-#include <numeric>
-#include <queue>
 #include <random>
-#include <utility>
 #include <vector>
 
 
@@ -218,9 +212,6 @@ private:
         // Fill rest of population
         while (newGeneration.size() < m_config.populationSize)
         {
-            std::size_t firstIndex { getRandomPopulationIndex() };
-            std::size_t secondIndex { getRandomPopulationIndex(firstIndex) };
-
             const auto [first, second] { m_selector.select(m_currentPopulation) };
             
             newGeneration.push_back( 
@@ -261,11 +252,6 @@ private:
             .best { m_bestSolution },
             .generation { m_generationCount }
         };
-    }
-
-    std::size_t getRandomPopulationIndex(std::size_t omit = -1)
-    {
-        return m_rng.getIntegerExclude<std::size_t>(0, m_config.populationSize - 1, omit);
     }
 };
 

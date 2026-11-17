@@ -38,7 +38,7 @@ template <typename Sequence, typename Fitness>
 struct CallbackContext
 {
     const std::vector<Chromosome<Sequence, Fitness>>& population;
-    const Chromosome<Sequence, Fitness> best;
+    const Chromosome<Sequence, Fitness>& best;
 
     std::size_t generation;
 };

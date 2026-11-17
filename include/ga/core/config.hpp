@@ -22,7 +22,6 @@ namespace ga
  * @note `eliteCount` must be less than `populationSize`.
  * @note `tournamentSize` must not exceed `populationSize`.
  */
-// template <typename Fitness>
 struct Config
 {
     /**

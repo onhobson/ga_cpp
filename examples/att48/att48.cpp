@@ -57,7 +57,7 @@ int main()
 
     ga::GeneticAlgorithm<Sequence, int> ga {
         evalFunc,
-        ga::prebuilt::permutationOperators<Sequence>(),
+        ga::op_set::permutationOperators<Sequence>(),
         config
     };
 

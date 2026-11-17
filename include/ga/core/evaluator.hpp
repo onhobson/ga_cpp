@@ -1,5 +1,5 @@
-#ifndef GA_EVALUATOR_HPP
-#define GA_EVALUATOR_HPP
+#ifndef GA_CORE_EVALUATOR_HPP
+#define GA_CORE_EVALUATOR_HPP
 
 #include "ga/core/chromosome.hpp"
 

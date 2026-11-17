@@ -1,7 +1,7 @@
-#ifndef GA_POPULATOR_HPP
-#define GA_POPULATOR_HPP
+#ifndef GA_CORE_POPULATOR_HPP
+#define GA_CORE_POPULATOR_HPP
 
-#include "ga/common/random.hpp"
+#include "ga/utility/random.hpp"
 
 #include "ga/operations/crossover.hpp"
 #include "ga/operations/mutate.hpp"

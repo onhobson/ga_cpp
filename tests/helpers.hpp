@@ -1,7 +1,7 @@
 #ifndef GA_TESTS_HELPERS_HPP
 #define GA_TESTS_HELPERS_HPP
 
-#include "ga/common/random.hpp"
+#include "ga/utility/random.hpp"
 
 #include <gtest/gtest.h>
 

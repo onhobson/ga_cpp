@@ -1,10 +1,11 @@
-#ifndef GA_CORE_CONFIG_H
-#define GA_CORE_CONFIG_H
+#ifndef GA_CORE_CONFIG_HPP
+#define GA_CORE_CONFIG_HPP
 
 #include <format>
 #include <stdexcept>
 #include <vector>
 #include <optional>
+
 
 namespace ga
 {

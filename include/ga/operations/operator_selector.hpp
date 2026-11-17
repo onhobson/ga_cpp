@@ -52,6 +52,8 @@ protected:
         // Build WeightedOperator array by bundling operations and weights
         for (std::size_t i {0}; i < operations.size(); ++i)
         {
+            if (!std::isfinite(weights[i]))
+                throw std::invalid_argument("Given weight must be finite");
             if (weights[i] < 0)
                 throw std::invalid_argument(std::format("Given weight, {}, cannot be negative", weights[i]));
 
@@ -61,6 +63,9 @@ protected:
                 WeightedOperator { operations[i], cumWeight }
             );
         }
+
+        if (cumWeight == 0.0)
+            throw std::invalid_argument("All supplied weights cannot be 0");
     }
 
     struct WeightedOperator

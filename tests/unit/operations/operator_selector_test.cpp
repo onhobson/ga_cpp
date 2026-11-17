@@ -141,3 +141,39 @@ TEST(OperatorSelectorTest, ThrowsWhenWeightIsNegative)
         std::invalid_argument
     );
 }
+
+TEST(OperatorSelectorTest, ThrowsForNaNOrInfWeight)
+{
+    EXPECT_THROW(
+        (TestOperatorSelector { { 1 }, { NAN } }),
+        std::invalid_argument
+    );
+    
+    EXPECT_THROW(
+        (TestOperatorSelector { { 1 }, { INFINITY } }),
+        std::invalid_argument
+    );
+
+    EXPECT_THROW(
+        (TestOperatorSelector { { 1, 2, 3 }, { 1.0, 1.0, NAN } }),
+        std::invalid_argument
+    );
+
+    EXPECT_THROW(
+        (TestOperatorSelector { { 1, 2, 3 }, { 1.0, INFINITY, 1.0 } }),
+        std::invalid_argument
+    );
+}
+
+TEST(OperatorSelectorTest, ThrowsForAllZeroWeights)
+{
+    EXPECT_THROW(
+        (TestOperatorSelector { { 1, 2, 3 }, { 0.0, 0.0, 0.0 } }),
+        std::invalid_argument
+    );
+
+    EXPECT_THROW(
+        (TestOperatorSelector { { 1 }, { 0.0 } }),
+        std::invalid_argument
+    );
+}

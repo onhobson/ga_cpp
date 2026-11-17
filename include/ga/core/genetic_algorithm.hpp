@@ -179,7 +179,7 @@ private:
     // Stores best solution found during evaluation.
     Chromosome m_bestSolution {};
 
-    int m_sinceLastCallback { 0 };
+    std::size_t m_sinceLastCallback { 0 };
     std::size_t m_generationCount { 0 };
 
     const Config m_config;

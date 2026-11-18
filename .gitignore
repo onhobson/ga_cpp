@@ -1,5 +1,10 @@
 TODO.md
+
 .vscode/
+
+# Doxygen output
+docs/html/
+docs/latex/
 
 # Prerequisites
 *.d

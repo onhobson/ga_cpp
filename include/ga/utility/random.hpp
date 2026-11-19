@@ -132,6 +132,9 @@ public:
      * @pre `exclude` has no duplicates
      * @pre For all n in `exclude`, `[min, max)` contains `n`
      * @pre `[min, max) != exclude`
+     * 
+     * @note To keep `get()` efficient, the responsibility for setting up `exclude` correctly (sorted, no duplicates) is placed on the caller.
+     *  This is to prevent `get()` from needing to attempt to sort and dedupe every call.
      */
     template <std::integral T = int>
     T get(T min, T max, const std::vector<T>& exclude)

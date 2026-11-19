@@ -38,7 +38,7 @@ public:
 
 
     /**
-     * @brief Generates a random integer in the range [min, max).
+     * @brief Generates a random integer in the range `[min, max)`.
      * 
      * @tparam T A `std::integral` type, defaults to `int`.
      * 
@@ -57,7 +57,7 @@ public:
     }
 
     /**
-     * @brief Generates a random real number in the range [min, max).
+     * @brief Generates a random real number in the range `[min, max)`.
      * 
      * @tparam T A `std::floating_point` type, defaults to `double`.
      * 
@@ -78,7 +78,7 @@ public:
     
     /**
      * @fn template <std::integral T = int> T get(T min, T max, T exclude)
-     * @brief Generates a random integer between in the range [min, max), excluding a specific value.
+     * @brief Generates a random integer between in the range `[min, max)`, excluding a specific value.
      * 
      * @details
      *  Performs exclusion via index remapping.
@@ -114,7 +114,7 @@ public:
     
     /**
      * @fn template <std::integral T = int> T get(T min, T max, const std::vector<T>& exclude)
-     * @brief Generates a random integer between in the range [min, max), excluding a vector of values.
+     * @brief Generates a random integer between in the range `[min, max)`, excluding a vector of values.
      * 
      * @details
      *  Performs exclusion via index remapping.
@@ -147,7 +147,7 @@ public:
 
         assert(validCount > 0 && "Impossible request: Exclude list excludes all values in given range");
 
-        std::uniform_int_distribution<T> dist {0, validCount};
+        std::uniform_int_distribution<T> dist {0, validCount - 1};
         T val { min + dist(m_impl) };
 
         // Add offset value to val

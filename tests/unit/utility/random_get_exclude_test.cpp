@@ -26,16 +26,26 @@ TEST_F(RandomGetExcludeTest, GetIntegralExcludeSingleValue)
 
 TEST_F(RandomGetExcludeTest, GetIntegralExcludeMultipleValues)
 {
-    const std::vector<int> excluded { 2, 3 };
+    std::vector<int> excluded;
 
-    for (int i = 0; i < 100; ++i)
+    for (int i { 0 }; i < 1000; ++i)
     {
-        const int value = rng.get(1, 5, excluded);
+        excluded.clear();
+        while (excluded.size() < 3)
+        {
+            int val { rng.get(0, 6) };
+            if (std::ranges::find(excluded, val) == excluded.end())
+                excluded.push_back(val);
+        }
+        std::ranges::sort(excluded);
 
-        EXPECT_GE(value, 1);
-        EXPECT_LT(value, 5);
-        EXPECT_NE(value, 2);
-        EXPECT_NE(value, 3);
+        const int randVal = rng.get(0, 6, excluded);
+
+        EXPECT_GE(randVal, 0);
+        EXPECT_LT(randVal, 6);
+        
+        for (int val : excluded)
+            EXPECT_NE(randVal, val);
     }
 }
 

@@ -58,7 +58,7 @@ public:
             // Randomly select subsequent items to override sample items
             for (std::size_t i { 0 }; i < population.size(); ++i)
             { 
-                if (i == chosen[0])
+                if (i == chosen[0]) // Skip index if chosen as first selection
                     continue;
 
                 if (seen < m_tournamentSize)

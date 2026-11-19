@@ -119,3 +119,24 @@ TEST_F(EvaluatorTest, MoreThanHalfOfThePopulationCanBeElite)
         EXPECT_EQ(population[i].fitness, expectedSequence * 2);
     }
 }
+
+TEST_F(EvaluatorTest, ThrowsPopulationSizeLessThanEliteCount)
+{
+    ga::detail::Evaluator<int, int, std::greater<int>> evaluator {
+        [](int n) { return n; },
+        20
+    };
+
+    EXPECT_DEBUG_DEATH(
+        evaluator.evaluate(population),
+        "Population size must be greater than or equal to elite count"
+    );
+
+    while (population.size() < 19)
+        population.emplace_back(Chromosome { 2, 0 });
+
+    EXPECT_DEBUG_DEATH(
+        evaluator.evaluate(population),
+        "Population size must be greater than or equal to elite count"
+    );
+}

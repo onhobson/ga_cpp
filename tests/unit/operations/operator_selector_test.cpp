@@ -107,14 +107,14 @@ TEST(OperatorSelectorTest, NoOperationConstructorDoesNotThrow)
     );
 }
 
-TEST(OperatorSelectorTest, NoOperationSelectThrows)
+TEST(OperatorSelectorTest, ThrowsOnNoOperationSelect)
 {
     TestOperatorSelector selector {};
     ga::Random rng { ga::Random::generateMtEngine() };
 
-    EXPECT_THROW(
+    EXPECT_DEBUG_DEATH(
         selector.select(rng),
-        std::invalid_argument
+        "Operations were not available for selection"
     );
 }
 

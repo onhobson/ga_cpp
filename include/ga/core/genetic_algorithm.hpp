@@ -122,6 +122,8 @@ public:
      * @param options A `ga::RunOptions` object containing the initializer, terminator, and callback functions to use during the run.
      * 
      * @return A `ga::Result` object containing the best `Chromosome` found and the number of generations processed.
+     * 
+     * @throws `std::invalid_argument` if given `population` size does not match `config.populationSize` given to GeneticAlgorithm
      */
     template <typename Initializer, typename Terminator, typename Callback>
     requires (
@@ -149,6 +151,8 @@ public:
         // Begin GA loop
         while (!options.terminator(createTerminationContext()))
         {
+            assert(m_currentPopulation.size() == m_config.populationSize && "Current population size must stay equal to configured population size");
+
             ++m_generationCount;
 
             createNewGeneration();

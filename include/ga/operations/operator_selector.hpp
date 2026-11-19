@@ -4,6 +4,7 @@
 #include "ga/utility/random.hpp"
 
 #include <algorithm>
+#include <cassert>
 #include <format>
 #include <random>
 #include <vector>
@@ -25,7 +26,15 @@ class OperatorSelector
 protected:
     OperatorSelector() = default;
 
-    /// @brief Construct a new OperatorSelector with given operations, assigned equal weights 
+    /**
+     * @brief Construct a new OperatorSelector with given operations, assigned equal weights 
+     * 
+     * @par operations A vector of operations to be considered by the algorithm
+     * 
+     * @throws `std::invalid_argument` if `operations.size() != weights.size()`
+     * @throws `std::invalid_argument` if `operations.empty()`
+     * @throws `std::invalid_argument` if sum of `weights` is `0.0`
+     */
     OperatorSelector(
         std::vector<Operation> operations
     ) 
@@ -35,7 +44,19 @@ protected:
         )
     { }
 
-    /// @brief Construct a new OperatorSelector object with a vector of operations and a vector of associated weights. 
+    /**
+     * @brief Construct a new OperatorSelector object with a vector of operations and a vector of associated weights. 
+     * 
+     * Operations and weights are paired based on index. 
+     * Operations given a weight of 0.0 are omitted from selection
+     * 
+     * @par operations A vector of operations to be considered by the algorithm
+     * @par weights A vector of associated weights
+     * 
+     * @throws `std::invalid_argument` if `operations.size() != weights.size()`
+     * @throws `std::invalid_argument` if `operations.empty()`
+     * @throws `std::invalid_argument` if sum of `weights` is `0.0`
+     */
     OperatorSelector(
         std::vector<Operation> operations,
         std::vector<double> weights
@@ -45,7 +66,7 @@ protected:
         if (operations.size() != weights.size())
             throw std::invalid_argument("Mismatched operation and weight sizes");
         if (operations.empty())
-            throw std::invalid_argument("At least one operation is required");
+            throw std::invalid_argument("At least one operation is required when instantiating with a vector");
 
         double cumWeight { 0.0 };
         
@@ -54,7 +75,7 @@ protected:
         {
             if (!std::isfinite(weights[i]))
                 throw std::invalid_argument("Given weight must be finite");
-            if (weights[i] < 0)
+            if (weights[i] < 0.0)
                 throw std::invalid_argument(std::format("Given weight, {}, cannot be negative", weights[i]));
 
             cumWeight += weights[i];
@@ -84,8 +105,7 @@ protected:
      */
     Operation getOperation(Random& rng) const
     {
-        if (m_weightedOperators.empty())
-            throw std::invalid_argument("No operations available for selection");
+        assert(!m_weightedOperators.empty() && "Operations were not available for selection");
             
         // Select operator based on predefined weights
         double randomNum { rng.get<double>(0.0, m_weightedOperators.back().weight) };
@@ -99,8 +119,7 @@ protected:
             })
         };
         
-        if (it == m_weightedOperators.end())
-            throw std::invalid_argument("Random weight was not within given operator weight range");
+        assert(it != m_weightedOperators.end() && "Random weight was not within given operator weight range");
 
         return it->op;
     }

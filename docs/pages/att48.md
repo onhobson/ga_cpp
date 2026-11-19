@@ -30,7 +30,7 @@ int evalFunc(const Sequence& sequence)
 
 ## Configuring the Algorithm
 
-The example uses a @ref ga::Config with a population of 50 tours, preserves 3 elites, and uses a tournament size of 3. It supplies the built-in permutation operators through @ref ga::op_set::permutationOperators:
+The example uses a @ref ga::Config with a population of 50 tours, preserves 3 elites, and uses a tournament size of 3. It supplies the built-in permutation operators through `ga::op_set::permutationOperators()`.
 
 @code{.cpp}
 ga::Config config {

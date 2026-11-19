@@ -19,8 +19,8 @@ An operator set, under the namespace @ref ga::op_set, groups related crossover a
 Operators are supplied to the genetic algorithm by passing a @ref ga::Operators instance to the @ref ga::GeneticAlgorithm constructor.
 
 The @ref ga::Operators struct contains two members:
-- @ref ga::Operators::crossover
-- @ref ga::Operators::mutate
+- `crossover`, a @ref ga::Crossover
+- `mutate`, a @ref ga::Mutate
 
 Each member may be constructed in one of three ways:
 
@@ -37,19 +37,19 @@ Each member may be constructed in one of three ways:
 
 The library provides built-in permutation operators for immediate use.
 
-Permutation crossover operators:
-- @ref ga::crossover_op::alternatingEdge
-- @ref ga::crossover_op::order
-- @ref ga::crossover_op::edgeRecombination
+Permutation crossover operators (in `ga::crossover_op`):
+- `alternatingEdge()`
+- `order`
+- `edgeRecombination()`
 
-Permutation mutation operators:
-- @ref ga::mutate_op::insert
-- @ref ga::mutate_op::inversion
-- @ref ga::mutate_op::scramble
-- @ref ga::mutate_op::swap
+Permutation mutation operators (in `ga::mutate_op`):
+- `insert()`
+- `inversion()`
+- `scramble()`
+- `swap()`
 
 Operator set containing the built-in permutation operators:
-- @ref ga::op_set::permutationOperators
+- `ga::op_set::permutationOperators()`
 
 All built-in permutation operators require the sequence used by the algorithm to satisfy @ref ga::constraints::Permutable.
 

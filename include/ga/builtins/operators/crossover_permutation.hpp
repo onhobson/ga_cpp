@@ -41,13 +41,13 @@ namespace ga::crossover_op
         Sequence child { parent1 };
         auto childBegin { std::ranges::begin(child) };
 
-        const std::size_t startIndex { rng.template getInteger<std::size_t>(0, size - 1) };
+        const std::size_t startIndex { rng.template get<std::size_t>(0, size) };
         Gene current { parent1Begin[startIndex] };
         std::size_t childSize {};
         childBegin[childSize++] = current;
         used.insert(current);
 
-        bool parentOne { (rng.getInteger(0, 1)) ? true : false };
+        bool parentOne { (rng.get(0, 2)) ? true : false };
 
         while (childSize < size)
         {
@@ -85,7 +85,7 @@ namespace ga::crossover_op
                 }
             }
 
-            const std::size_t choice { rng.template getInteger<std::size_t>(0, candidates.size() - 1) };
+            const std::size_t choice { rng.template get<std::size_t>(0, candidates.size()) };
             current = candidates[choice];
             childBegin[childSize++] = current;
             used.insert(current);
@@ -125,8 +125,8 @@ namespace ga::crossover_op
         auto childBegin { std::ranges::begin(child) };
 
         // Copy subsequence from parent1        
-        const std::size_t firstCut { rng.template getInteger<std::size_t>(0, size - 1) };
-        const std::size_t secondCut { rng.template getInteger<std::size_t>(firstCut + 1, size) };
+        const std::size_t firstCut { rng.template get<std::size_t>(0, size - 1) };
+        const std::size_t secondCut { rng.template get<std::size_t>(firstCut + 1, size + 1) }; // secondCut is exclusive
 
         for (std::size_t i { firstCut }; i < secondCut; ++i)
             used.insert(parent1Begin[i]);
@@ -255,7 +255,7 @@ namespace ga::crossover_op
                 }
 
                 // Select random candidate
-                gene = candidates[ rng.getInteger<std::size_t>(0, candidates.size() - 1) ];
+                gene = candidates[ rng.get<std::size_t>(0, candidates.size()) ];
             }
             else
             {
@@ -268,7 +268,7 @@ namespace ga::crossover_op
                         candidates.push_back(candidate);
                 }
 
-                gene = candidates[ rng.getInteger<std::size_t>(0, candidates.size() - 1) ];
+                gene = candidates[ rng.get<std::size_t>(0, candidates.size()) ];
             }
 
             childBegin[childSize++] = gene;

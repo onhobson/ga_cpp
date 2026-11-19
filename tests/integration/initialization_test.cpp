@@ -30,8 +30,8 @@ namespace
             Sequence newSeq { baseSequence };
             
             std::swap(
-                newSeq[ rng.getInteger<std::size_t>(0, newSeq.size() - 1) ],
-                newSeq[ rng.getInteger<std::size_t>(0, newSeq.size() - 1) ]
+                newSeq[ rng.get<std::size_t>(0, newSeq.size()) ],
+                newSeq[ rng.get<std::size_t>(0, newSeq.size()) ]
             );
             
             population.push_back(newSeq);

@@ -21,8 +21,8 @@ TEST(OrderCrossoverTest, PreservesParentOneSegmentAndParentTwoOrder)
     for (std::uint32_t seed { 0 }; seed < 32; ++seed)
     {
         auto cutRng { makeRandom(seed) };
-        const std::size_t firstCut { cutRng.getInteger<std::size_t>(0, parent1.size() - 1) };
-        const std::size_t secondCut { cutRng.getInteger<std::size_t>(firstCut + 1, parent1.size()) };
+        const std::size_t firstCut { cutRng.get<std::size_t>(0, parent1.size() - 1) };
+        const std::size_t secondCut { cutRng.get<std::size_t>(firstCut + 1, parent1.size() + 1) };
 
         auto rng { makeRandom(seed) };
         const auto child { ga::crossover_op::order(parent1, parent2, rng) };

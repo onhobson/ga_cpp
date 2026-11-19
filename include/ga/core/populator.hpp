@@ -39,7 +39,7 @@ public:
     {
         Sequence newSequence;
 
-        if (rng.getReal(0.0, 1.0) < m_crossoverRate)
+        if (rng.get<double>(0.0, 1.0) < m_crossoverRate)
         {
             newSequence = m_crossover(seq1, seq2, rng);
         }

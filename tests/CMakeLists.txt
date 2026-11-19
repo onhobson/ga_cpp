@@ -24,7 +24,9 @@ add_executable("ga_tests"
     unit/operations/operator_selector_test.cpp
 
     unit/utility/constraints_test.cpp
-    unit/utility/random_test.cpp
+    unit/utility/random_get_exclude_test.cpp
+    unit/utility/random_get_integral_test.cpp
+    unit/utility/random_get_floating_test.cpp
 
     integration/config_effects_test.cpp
     integration/evaluation_test.cpp

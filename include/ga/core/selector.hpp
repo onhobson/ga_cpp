@@ -69,7 +69,7 @@ public:
                 {
                     // Uniformly select integer in [0, seen]
                     const std::size_t j {
-                        m_rng.getInteger<std::size_t>(0, seen)
+                        m_rng.get<std::size_t>(0, seen + 1)
                     };
 
                     if (j < m_tournamentSize)

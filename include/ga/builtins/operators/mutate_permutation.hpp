@@ -32,14 +32,25 @@ namespace ga::mutate_op
         if (size < 3)
             throw std::invalid_argument("Invalid sequence size");
 
-        std::ptrdiff_t i1 { rng.getInteger<std::ptrdiff_t>(0, size - 1) };
+        std::ptrdiff_t i1 { rng.get<std::ptrdiff_t>(0, size) };
         std::ptrdiff_t i2;
 
         // Select second index not adjacent to first if size allows
         if (size > 4)
-            i2 = rng.getIntegerExclude<std::ptrdiff_t>(0, size - 1, {i1, i1 + 1, i1 - 1});
+        {
+            std::vector<std::ptrdiff_t> excludes;
+
+            // Build excludes of vals adjacent to i1, bound by [0, size)
+            if (i1 > 0) excludes.push_back(i1 - 1);
+            excludes.push_back(i1);
+            if (i1 < size - 1) excludes.push_back(i1 + 1);
+
+            i2 = rng.get<std::ptrdiff_t>(0, size, excludes);
+        }
         else
-            i2 = rng.getIntegerExclude<std::ptrdiff_t>(0, size - 1, i1);
+        {
+            i2 = rng.get<std::ptrdiff_t>(0, size, i1);
+        }
 
         if (i1 > i2)
             std::swap(i1, i2);
@@ -64,7 +75,6 @@ namespace ga::mutate_op
         position += gene.size();
 
         std::ranges::copy(middle, childBegin + position);
-        position += middle.size();
 
         return child;             
     }
@@ -90,8 +100,8 @@ namespace ga::mutate_op
             throw std::invalid_argument("Invalid sequence size");
 
         // Select two random indexes
-        auto i1 { rng.getInteger<std::ptrdiff_t>(0, size - 1) };
-        auto i2 { rng.getIntegerExclude<std::ptrdiff_t>(0, size - 1, i1) };
+        auto i1 { rng.get<std::ptrdiff_t>(0, size) };
+        auto i2 { rng.get<std::ptrdiff_t>(0, size, i1) };
         
         if (i1 > i2)
             std::swap(i1, i2);
@@ -126,8 +136,8 @@ namespace ga::mutate_op
             throw std::invalid_argument("Invalid sequence size");
         
         // Select two random indexes
-        auto i1 { rng.getInteger<std::ptrdiff_t>(0, size - 1) };
-        auto i2 { rng.getIntegerExclude<std::ptrdiff_t>(0, size - 1, i1) };
+        auto i1 { rng.get<std::ptrdiff_t>(0, size) };
+        auto i2 { rng.get<std::ptrdiff_t>(0, size, i1) };
         
         if (i1 > i2)
             std::swap(i1, i2);
@@ -171,8 +181,8 @@ namespace ga::mutate_op
             throw std::invalid_argument("Invalid sequence size");
             
         // Select two random indexes
-        const auto i1 { rng.getInteger<std::ptrdiff_t>(0, size - 1) };
-        const auto i2 { rng.getIntegerExclude<std::ptrdiff_t>(0, size - 1, i1) };
+        const auto i1 { rng.get<std::ptrdiff_t>(0, size) };
+        const auto i2 { rng.get<std::ptrdiff_t>(0, size, i1) };
 
         Sequence child { parent };
         const auto childBegin { std::ranges::begin(child) };

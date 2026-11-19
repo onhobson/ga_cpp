@@ -17,7 +17,7 @@ namespace ga::crossover_op
     template <typename Sequence>
     Sequence singlePoint(const Sequence& parent1, const Sequence& parent2, Random& rng)
     {
-        std::size_t crossoverIndex { rng.template getInteger<std::size_t>(1, parent1.size() - 2) };
+        std::size_t crossoverIndex { rng.template get<std::size_t>(1, parent1.size() - 1) };
 
         // Initialize new chromosome
         Sequence child {};

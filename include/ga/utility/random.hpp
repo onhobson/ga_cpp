@@ -44,7 +44,7 @@ public:
      * 
      * @param min The minimum value (inclusive).
      * @param max The maximum value (exclusive).
-     * @return A random integer in the range [min, max).
+     * @return A random integer in the range `[min, max)`.
      * 
      * @pre `min < max`
      */
@@ -63,7 +63,7 @@ public:
      * 
      * @param min The minimum value (inclusive).
      * @param max The maximum value (exclusive).
-     * @return A random real number in the range [min, max).
+     * @return A random real number in the range `[min, max)`.
      * 
      * @pre `min < max`
      */
@@ -77,7 +77,6 @@ public:
 
     
     /**
-     * @fn template <std::integral T = int> T get(T min, T max, T exclude)
      * @brief Generates a random integer between in the range `[min, max)`, excluding a specific value.
      * 
      * @details
@@ -91,7 +90,7 @@ public:
      * @param min The minimum value (inclusive).
      * @param max The maximum value (exclusive).
      * @param exclude The value to exclude.
-     * @return A random integer in the range [min, max) that is not equal to `exclude`.
+     * @return A random integer in the range `[min, max)` that is not equal to `exclude`.
      * 
      * @pre `min < max`
      * @pre `[min, max)` contains `exclude`
@@ -113,7 +112,6 @@ public:
     }
     
     /**
-     * @fn template <std::integral T = int> T get(T min, T max, const std::vector<T>& exclude)
      * @brief Generates a random integer between in the range `[min, max)`, excluding a vector of values.
      * 
      * @details
@@ -127,7 +125,7 @@ public:
      * @param min The minimum value (inclusive).
      * @param max The maximum value (exclusive).
      * @param exclude The values to exclude.
-     * @return A random integer in the range [min, max) that is not in `exclude`.
+     * @return A random integer in the range `[min, max)` that is not in `exclude`.
      * 
      * @pre `min < max`
      * @pre `exclude` is in sorted order
@@ -164,121 +162,6 @@ public:
         }
 
         return val;
-    }
-
-    /**
-     * @brief Generates a random integer between `min` and `max` (inclusive).
-     * 
-     * @tparam T The type of the real number, defaulting to `int`.
-     * 
-     * @param min The minimum value (inclusive).
-     * @param max The maximum value (inclusive).
-     * @return A random integer in the range [min, max].
-     * 
-     * @throws `std::invalid_argument` If `min` is greater than `max`.
-     */
-    template <std::integral T = int>
-    T getInteger(T min, T max) {
-        if (min > max)
-            throw std::invalid_argument("min value greater than max value");
-
-        return std::uniform_int_distribution<T>{min, max}( m_impl );
-    }
-
-
-    /**
-     * @brief Generates a random integer between `min` and `max` (inclusive), excluding a specific value.
-     * 
-     * @tparam T The type of the real number, defaulting to `int`.
-     * 
-     * @param min The minimum value (inclusive).
-     * @param max The maximum value (inclusive).
-     * @param exclude The value to exclude.
-     * @return A random integer in the range [min, max] that is not equal to `exclude`.
-     * 
-     * @throws `std::invalid_argument` If `min` is greater than `max`.
-     * @throws `std::invalid_argument` If `min` equals `max` and both equal `exclude`.
-     */
-    template <std::integral T = int>
-    T getIntegerExclude(T min, T max, T exclude) {
-        if (min > max)
-            throw std::invalid_argument("min value greater than max value");
-        if (min == max && max == exclude)
-            throw std::invalid_argument("Impossible request: min == max == exclude");
-
-        T num;
-        std::uniform_int_distribution<T> dist {min, max};
-
-        do
-        {
-            num = dist(m_impl);
-        } while (num == exclude);
-        
-        return num;
-    }
-
-    /**
-     * @brief Generates a random integer between `min` and `max` (inclusive), excluding specific values.
-     * @throws `std::invalid_argument` If `min` is greater than `max` or every value in the range is excluded.
-     */
-    template <std::integral T = int>
-    T getIntegerExclude(T min, T max, const std::vector<T>& exclude) {
-        if (min > max)
-            throw std::invalid_argument("min value greater than max value");
-
-        // Clean exclude: bound, sort & remove duplicates
-        std::vector<T> excludedInRange;
-        for (const T value : exclude) {
-            if (value >= min && value <= max)
-                excludedInRange.push_back(value);
-        }
-        std::ranges::sort(excludedInRange);
-        excludedInRange.erase(std::unique(excludedInRange.begin(), excludedInRange.end()), excludedInRange.end());
-
-        // Iterate each possible value until one is not contained in exclude list
-        T expected = min;
-        bool allExcluded = true;
-        bool reachedMax = false;
-        for (const T value : excludedInRange) {
-            if (value != expected) {
-                allExcluded = false;
-                break;
-            }
-            if (value == max) {
-                reachedMax = true;
-                break;
-            }
-            ++expected;
-        }
-        if (allExcluded && reachedMax)
-            throw std::invalid_argument("Impossible request: every value in range is excluded");
-
-        std::uniform_int_distribution<T> dist {min, max};
-        T num;
-        do {
-            num = dist(m_impl);
-        } while (std::ranges::binary_search(excludedInRange, num));
-
-        return num;
-    }
-
-    /**
-     * @brief Generates a random real number between `min` and `max`.
-     * 
-     * @tparam T The type of the real number, defaulting to `double`.
-     * 
-     * @param min The minimum value (inclusive).
-     * @param max The maximum value (exclusive).
-     * @return A random real number in the range [min, max).
-     * 
-     * @throws `std::invalid_argument` If `min` is greater than `max`.
-     */
-    template <std::floating_point T = double>
-    T getReal(T min, T max) {
-        if (min > max)
-            throw std::invalid_argument("min value greater than max value");
-
-        return std::uniform_real_distribution<T>{min, max}(m_impl);
     }
     
     /// @brief Generates a Mersenne Twister engine initialized with a 256 bit seed sequence.

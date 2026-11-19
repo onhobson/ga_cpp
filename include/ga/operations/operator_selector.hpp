@@ -88,7 +88,7 @@ protected:
             throw std::invalid_argument("No operations available for selection");
             
         // Select operator based on predefined weights
-        double randomNum { rng.getReal(0.0, m_weightedOperators.back().weight) };
+        double randomNum { rng.get<double>(0.0, m_weightedOperators.back().weight) };
 
         auto it { std::upper_bound(
             m_weightedOperators.begin(), 

@@ -27,6 +27,12 @@ namespace
             ++num;
         }
 
+        if (it == child.end())
+        {
+            std::cout << "AH!\n";
+            int whoa = 0;
+            ++whoa;
+        }
         ASSERT_NE(it, child.end());
 
         const int insertedNum { *it };

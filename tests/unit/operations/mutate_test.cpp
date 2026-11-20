@@ -16,7 +16,7 @@ TEST(MutateTest, SingleOperationConstructorAppliesMutation)
             return Sequence { sequence.front(), 24 };
         }
     };
-    ga::Random rng { ga::Random::generateMtEngine() };
+    ga::Random rng {};
 
     EXPECT_EQ(mutate({ 1, 2, 3 }, rng), (Sequence { 1, 24 }));
 }
@@ -28,7 +28,7 @@ TEST(MutateTest, OperationsAndWeightsConstructorAppliesSelectedMutation)
         [](const Sequence&, ga::Random&) { return Sequence { 2 }; }
     };
     ga::Mutate<Sequence> mutate { std::move(operations), { 0.0, 1.0 } };
-    ga::Random rng { ga::Random::generateMtEngine() };
+    ga::Random rng {};
 
     EXPECT_EQ(mutate({}, rng), (Sequence { 2 }));
 }

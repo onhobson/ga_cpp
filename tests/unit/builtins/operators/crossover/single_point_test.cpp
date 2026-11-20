@@ -10,7 +10,7 @@
 class SinglePointTest : public testing::Test
 {
 protected:
-    ga::Random rng { ga::Random::generateMtEngine() };
+    ga::Random rng {};
 
     std::vector<int> sampleSequence1 { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     std::vector<int> sampleSequence2 { 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };

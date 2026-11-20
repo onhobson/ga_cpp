@@ -5,8 +5,6 @@
 #include <cassert>
 #include <chrono>
 #include <concepts>
-#include <cstdint>
-#include <limits>
 #include <memory>
 #include <random>
 #include <ranges>
@@ -15,26 +13,35 @@
 
 namespace ga
 {
-    
-/** @brief A class that provides a uniform random number generator with an erased engine type. */
+
+/**
+ * @brief A utility class that provides random number generation functionality for the genetic algorithm framework.
+ * 
+ *  The `Random` class encapsulates a Mersenne Twister random number generator engine.
+ *  
+ *  A `Random` object can be constructed with a default seed, a `std::mt19937::result_type seed`, or a `std::seed_seq seedSeq`.
+ *  The default constructor initializes the engine with a 256-bit seed sequence generated from the current time and random device.
+ */
 class Random
 {
 public:
-    // Copying and moving are disallowed to ensure reliable seeding
-    Random(const Random&) = delete;
-    Random& operator==(const Random&) = delete;
-
-    /**
-     * @brief Constructs a Random object using the given uniform random bit generator engine.
-     * @param URBG The uniform random bit generator engine. Must satisfy the requirements of a uniform random bit generator.
-     */
-    template <std::uniform_random_bit_generator URBG>
-    explicit Random(URBG engine) 
-        : m_engine { std::make_unique<EngineModel<URBG>>(std::move(engine)) }
-        , m_impl { *m_engine }
+    Random()
+        : m_engine { generateMtEngine() }
     { }
- 
 
+    /// @brief Constructs a `Random` object with a given seed for the Mersenne Twister engine.
+    Random(
+        std::mt19937::result_type seed
+    )
+        : m_engine { std::mt19937 { seed } }
+    { }
+
+    /// @brief Constructs a `Random` object with a given seed sequence for the Mersenne Twister engine.
+    Random(
+        std::seed_seq& seedSeq
+    )
+        : m_engine { std::mt19937 { seedSeq } }
+    { }
 
     /**
      * @brief Generates a random integer in the range `[min, max)`.
@@ -52,7 +59,7 @@ public:
     {
         assert(min < max && "Max value must be greater than min value");
 
-        return std::uniform_int_distribution<T>{min, static_cast<T>(max - 1)}( m_impl );
+        return std::uniform_int_distribution<T>{min, static_cast<T>(max - 1)}(m_engine);
     }
 
     /**
@@ -71,7 +78,7 @@ public:
     {
         assert(min < max && "Max value must be greater than min value");
 
-        return std::uniform_real_distribution<T>{min, max}(m_impl);
+        return std::uniform_real_distribution<T>{min, max}(m_engine);
     }
 
     
@@ -148,7 +155,7 @@ public:
         assert(validCount > 0 && "Impossible request: Exclude list excludes all values in given range");
 
         std::uniform_int_distribution<T> dist {0, validCount - 1};
-        T val { min + dist(m_impl) };
+        T val { min + dist(m_engine) };
 
         // Add offset value to val
         auto it { std::ranges::lower_bound(exclude, val) };
@@ -165,86 +172,27 @@ public:
 
         return val;
     }
-    
+
+private:
     /// @brief Generates a Mersenne Twister engine initialized with a 256 bit seed sequence.
     static constexpr std::mt19937 generateMtEngine()
     {
         std::random_device rd {};
         std::seed_seq ss { 
             static_cast<std::seed_seq::result_type>(std::chrono::steady_clock::now().time_since_epoch().count()),
-            rd(), rd(), rd(), rd(), rd(), rd(), rd(), rd() 
+            rd(), rd(), rd(), rd(), rd(), rd(), rd()
         };
 
         return std::mt19937 { ss };
     }
 
-private:
-    // Abstract Interface 
-    struct EngineConcept
-    {
-        using result_type = uint32_t;
+    std::mt19937 m_engine {};
 
-        virtual ~EngineConcept() = default;
-
-        virtual result_type next() = 0;
-    };
-
-    // Templated Implementation
-    template <std::uniform_random_bit_generator URBG>
-    class EngineModel : public EngineConcept
-    {
-    public:
-        static constexpr std::size_t result_width = 32;
-
-        EngineModel(URBG engine) 
-            : m_model { std::move(engine) } 
-        { }
-
-        result_type next() override { return m_model(); }
-
-    private:
-        std::independent_bits_engine<URBG, result_width, result_type> m_model;
-    };
-
-    // Type Erasure Wrapper
-    class ErasedURBG
-    {
-    public:
-        using result_type = uint32_t;
-
-        explicit ErasedURBG(EngineConcept& engine)
-            : m_engine { engine }
-        { }
-
-        static constexpr result_type min() noexcept
-        {
-            return 0;
-        }
-
-        static constexpr result_type max() noexcept 
-        {
-            return std::numeric_limits<result_type>::max();
-        }
-
-        result_type operator()()
-        {
-            return m_engine.next();
-        }
-        
-    private:
-        EngineConcept& m_engine;
-    };
-
-    std::unique_ptr<EngineConcept> m_engine;
-    ErasedURBG m_impl;
-
-
-    
 public:
-    /// @brief Returns a copy of the underlying uniform random bit generator engine.
-    ErasedURBG getEngine() 
+    /// @brief Returns a reference of the underlying uniform random bit generator engine.
+    std::mt19937& getEngine() 
     {
-        return ErasedURBG { *m_engine };
+        return m_engine;
     }
 
 };

@@ -16,7 +16,7 @@ TEST(CrossoverTest, SingleOperationConstructorAppliesCrossover)
             return Sequence { sequence1.front(), sequence2.front() };
         }
     };
-    ga::Random rng { ga::Random::generateMtEngine() };
+    ga::Random rng {};
 
     EXPECT_EQ(
         crossover({ 1, 2, 3 }, { 4, 5, 6 }, rng), 
@@ -31,7 +31,7 @@ TEST(CrossoverTest, OperationsAndWeightsConstructorAppliesSelectedCrossover)
         [](const Sequence&, const Sequence&, ga::Random&) { return Sequence { 2 }; }
     };
     ga::Crossover<Sequence> crossover { std::move(operations), { 0.0, 1.0 } };
-    ga::Random rng { ga::Random::generateMtEngine() };
+    ga::Random rng {};
 
     EXPECT_EQ(crossover({}, {}, rng), (Sequence { 2 }));
 }

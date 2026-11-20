@@ -6,7 +6,7 @@
 
 TEST(SelectorTest, SelectsTwoUniqueChromosomesFromPopulation)
 {
-    ga::Random rng { ga::Random::generateMtEngine() };
+    ga::Random rng {};
 
     for (std::size_t tournamentSize : { 0, 1, 2, 3 })
     {
@@ -32,7 +32,7 @@ TEST(SelectorTest, SelectsTwoUniqueChromosomesFromPopulation)
 
 TEST(SelectorTest, SelectsTwoSameChromosomesFromSinglePopulation)
 {
-    ga::Random rng { ga::Random::generateMtEngine() };
+    ga::Random rng {};
 
     for (std::size_t tournamentSize : { 0, 1, 2, 3 })
     {
@@ -52,7 +52,7 @@ TEST(SelectorTest, SelectsTwoSameChromosomesFromSinglePopulation)
 
 TEST(SelectorTest, SelectsTwoUniqueChromosomesFromLargePopulation)
 {
-    ga::Random rng { ga::Random::generateMtEngine() };
+    ga::Random rng {};
 
     for (std::size_t tournamentSize : { 0, 1, 2, 3 })
     {
@@ -78,7 +78,7 @@ TEST(SelectorTest, SelectsTwoUniqueChromosomesFromLargePopulation)
 
 TEST(SelectorTest, SelectSamplesEvenlyFromPopulation)
 {
-    ga::Random rng { ga::Random::generateMtEngine() };
+    ga::Random rng {};
 
     ga::detail::Selector<int, int, std::ranges::less> selector { 1, rng };
 
@@ -108,7 +108,7 @@ TEST(SelectorTest, SelectSamplesEvenlyFromPopulation)
 
 TEST(SelectorTest, DifferentCompareTypesChangeSelection)
 {
-    ga::Random rng { ga::Random::generateMtEngine() };
+    ga::Random rng {};
     constexpr std::size_t populationSize { 10 };
 
     ga::detail::Selector<int, int, std::ranges::less> lessSelector { populationSize, rng };
@@ -128,7 +128,7 @@ TEST(SelectorTest, DifferentCompareTypesChangeSelection)
 
 TEST(SelectorTest, GreaterSelectorSelectsGreatestFitness)
 {
-    ga::Random rng { ga::Random::generateMtEngine() };
+    ga::Random rng {};
     constexpr std::size_t populationSize { 10 };
 
     ga::detail::Selector<int, int, std::ranges::greater> selector { populationSize, rng };

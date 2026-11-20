@@ -18,10 +18,10 @@ TEST(AlternatingEdgeTest, ReturnsPermutationOfParentGenes)
 {
     const std::vector<int> originalParent1 { 1, 4, 2, 3, 5, 7, 8, 6, 9 };
     const std::vector<int> originalParent2 { 6, 7, 9, 4, 3, 2, 8, 5, 1 };
+    ga::Random rng {};
 
-    for (std::uint32_t seed { 0 }; seed < 32; ++seed)
+    for (int i { 0 }; i < 32; ++i)
     {
-        auto rng { makeRandom(seed) };
         auto parent1 { originalParent1 };
         auto parent2 { originalParent2 };
         std::shuffle(parent1.begin(), parent1.end(), rng.getEngine());
@@ -29,7 +29,7 @@ TEST(AlternatingEdgeTest, ReturnsPermutationOfParentGenes)
 
         const auto child { ga::crossover_op::alternatingEdge(parent1, parent2, rng) };
 
-        ASSERT_EQ(child.size(), parent1.size()) << "seed: " << seed;
+        ASSERT_EQ(child.size(), parent1.size());
         expectPermutationOf(child, parent1);
     }
 }
@@ -37,7 +37,7 @@ TEST(AlternatingEdgeTest, ReturnsPermutationOfParentGenes)
 TEST(AlternatingEdgeTest, HandlesOneGenePermutation)
 {
     const std::vector<int> parent { 42 };
-    auto rng { makeRandom(1) };
+    ga::Random rng {};
 
     const auto child { ga::crossover_op::alternatingEdge(parent, parent, rng) };
 
@@ -48,7 +48,7 @@ TEST(AlternatingEdgeTest, HandlesTwoGenePermutations)
 {
     const std::vector<int> parent1 { 1, 2 };
     const std::vector<int> parent2 { 2, 1 };
-    auto rng { makeRandom(2) };
+    ga::Random rng {};
 
     const auto child { ga::crossover_op::alternatingEdge(parent1, parent2, rng) };
 
@@ -60,7 +60,7 @@ TEST(AlternatingEdgeTest, SupportsStringGenes)
 {
     const std::vector<std::string> parent1 { "alpha", "beta", "gamma", "delta" };
     const std::vector<std::string> parent2 { "gamma", "alpha", "delta", "beta" };
-    auto rng { makeRandom(3) };
+    ga::Random rng {};
 
     const auto child { ga::crossover_op::alternatingEdge(parent1, parent2, rng) };
 
@@ -72,7 +72,7 @@ TEST(AlternatingEdgeTest, SupportsFixedSizeRanges)
 {
     const std::array<int, 4> parent1 { 1, 2, 3, 4 };
     const std::array<int, 4> parent2 { 3, 1, 4, 2 };
-    auto rng { makeRandom(4) };
+    ga::Random rng {};
 
     const auto child { ga::crossover_op::alternatingEdge(parent1, parent2, rng) };
 
@@ -83,7 +83,7 @@ TEST(AlternatingEdgeTest, ThrowsParentsDiffSize)
 {
     const std::vector<int> parent1 { 1, 2, 3, 4, 5 };
     const std::vector<int> parent2 { 1, 2, 3, 4, 5, 6 };
-    auto rng { makeRandom(5) };
+    ga::Random rng {};
 
     EXPECT_DEBUG_DEATH(
         ga::crossover_op::alternatingEdge(parent1, parent2, rng),
@@ -94,7 +94,7 @@ TEST(AlternatingEdgeTest, ThrowsParentsDiffSize)
 TEST(AlternatingEdgeTest, ThrowsParentSizeZero)
 {
     const std::vector<int> parent {};
-    auto rng { makeRandom(6) };
+    ga::Random rng {};
 
     EXPECT_DEBUG_DEATH(
         ga::crossover_op::alternatingEdge(parent, parent, rng),
@@ -106,7 +106,7 @@ TEST(AlternatingEdgeTest, ThrowsParentsAreNotPermutations)
 {
     const std::vector<int> parent1 { 1, 2, 3, 4, 5, 7 };
     const std::vector<int> parent2 { 1, 2, 3, 4, 5, 6 };
-    auto rng { makeRandom(6) };
+    ga::Random rng {};
 
     EXPECT_DEBUG_DEATH(
         ga::crossover_op::alternatingEdge(parent1, parent2, rng),

@@ -8,12 +8,6 @@
 #include <algorithm>
 
 
-inline ga::Random makeRandom(std::uint32_t seed)
-{
-    return ga::Random { std::mt19937 { seed } };
-}
-
-
 template <typename Sequence>
 inline void expectPermutationOf(Sequence actual, Sequence expected)
 {
@@ -28,7 +22,7 @@ inline void outputsPermutation(Sequence& parent, std::function<Sequence(const Se
 {
     for (std::uint32_t seed { 0 }; seed < count; ++seed)
     {
-        auto rng { makeRandom(seed) };
+        ga::Random rng {};
         std::ranges::shuffle(parent, rng.getEngine());
 
         const auto child { operation(parent, rng) };

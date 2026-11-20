@@ -14,7 +14,7 @@ namespace
     template <typename Sequence>
     void expectRandomPermutationPopulation(const Sequence& baseSequence, std::size_t populationSize)
     {
-        auto rng { makeRandom(12345) };
+        ga::Random rng {};
         const auto population {
             ga::init::RandomPermutation{}(baseSequence, populationSize, rng)
         };

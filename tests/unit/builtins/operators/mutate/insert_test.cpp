@@ -58,10 +58,10 @@ namespace
 TEST(InsertMutationTest, ReturnsValidPermutation)
 {
     std::vector<int> parent { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    ga::Random rng {};
 
-    for (std::uint32_t seed { 0 }; seed < 32; ++seed)
+    for (int i { 0 }; i < 32; ++i)
     {
-        auto rng { makeRandom(seed) };
         std::ranges::shuffle(parent, rng.getEngine());
 
         const auto child { ga::mutate_op::insert(parent, rng) };
@@ -74,11 +74,10 @@ TEST(InsertMutationTest, ReturnsValidPermutation)
 TEST(InsertMutationTest, PerformsInsertionCorrectly)
 {
     std::vector<int> parent { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    ga::Random rng {};
 
-    for (std::uint32_t seed { 0 }; seed < 32; ++seed)
+    for (int i { 0 }; i < 64; ++i)
     {
-        auto rng { makeRandom(seed) };
-
         const auto child { ga::mutate_op::insert(parent, rng) };
 
         ASSERT_EQ(child.size(), parent.size());
@@ -98,7 +97,7 @@ TEST(InsertMutationTest, WorksWithDifferentContainerTypes)
 
 TEST(InsertMutationTest, InvalidInputThrows)
 {
-    ga::Random rng { ga::Random::generateMtEngine() };
+    ga::Random rng {};
 
     std::vector<int> parent {};
     EXPECT_DEBUG_DEATH(

@@ -42,3 +42,4 @@ Explore the automatically generated API documentation:
 
 - [**Class List**](./annotated.html)
 - [**Namespace List**](./namespaces.html)
+- @ref architecture

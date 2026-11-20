@@ -36,7 +36,7 @@ public:
 TEST(OperatorSelectorTest, SingleOperationIsAlwaysSelected)
 {
     TestOperatorSelector selector { { 24 } };
-    ga::Random rng { ga::Random::generateMtEngine() };
+    ga::Random rng {};
 
     for (int i = 0; i < 100; ++i)
         EXPECT_EQ(selector.select(rng), 24);
@@ -48,7 +48,7 @@ TEST(OperatorSelectorTest, WeightedSelectionFollowsRelativeWeights)
         { 1, 2, 3 },
         { 0.0, 1.0, 3.0 }
     };
-    ga::Random rng { ga::Random::generateMtEngine() };
+    ga::Random rng {};
     int operation2Count {};
     int operation3Count {};
     constexpr int sampleCount { 10000 };
@@ -75,7 +75,7 @@ TEST(OperatorSelectorTest, UnweightedOperationsSelectUniformly)
     TestOperatorSelector selector {
         { 1, 2, 3 }
     };
-    ga::Random rng { ga::Random::generateMtEngine() };
+    ga::Random rng {};
     int operation1Count {};
     int operation2Count {};
     int operation3Count {};
@@ -110,7 +110,7 @@ TEST(OperatorSelectorTest, NoOperationConstructorDoesNotThrow)
 TEST(OperatorSelectorTest, ThrowsOnNoOperationSelect)
 {
     TestOperatorSelector selector {};
-    ga::Random rng { ga::Random::generateMtEngine() };
+    ga::Random rng {};
 
     EXPECT_DEBUG_DEATH(
         selector.select(rng),

@@ -44,8 +44,7 @@ namespace ga
 template <
     typename Sequence, 
     typename Fitness, 
-    typename Compare = std::ranges::less,
-    std::uniform_random_bit_generator URBG = std::mt19937
+    typename Compare = std::ranges::less
 >
 requires (
     std::totally_ordered<Fitness> &&
@@ -68,8 +67,7 @@ public:
     GeneticAlgorithm(
         std::function<Fitness(const Sequence&)> evaluationFunction,
         Operators<Sequence> operators,
-        Config config,
-        URBG randomEngine = URBG ( std::move(Random::generateMtEngine()) )
+        Config config
     )
         : m_evaluator { 
             evaluationFunction, 
@@ -81,7 +79,7 @@ public:
             operators.mutate,
             config.crossoverRate
         }
-        , m_rng { Random(randomEngine) }
+        , m_rng {}
         , m_selector { 
             m_config.tournamentSize, 
             m_rng 

@@ -15,7 +15,7 @@ class PopulatorTest : public testing::Test
 protected:
     int crossoverCount = 0;
 
-    ga::Random rng { ga::Random::generateMtEngine() };
+    ga::Random rng {};
 
     ga::Crossover<Sequence> crossover;
     ga::Mutate<Sequence> mutate;

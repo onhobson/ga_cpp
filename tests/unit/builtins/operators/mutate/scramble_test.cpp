@@ -67,11 +67,10 @@ TEST(ScrambleMutationTest, ReturnsValidPermutation)
 {
     std::vector<int> parent(32);
     std::ranges::iota(parent, 0);
+    ga::Random rng {};
 
-    for (std::uint32_t seed { 0 }; seed < 32; ++seed)
+    for (int i { 0 }; i < 32; ++i)
     {
-        auto rng { makeRandom(seed) };
-        
         std::ranges::shuffle(parent, rng.getEngine());
         const auto child { ga::mutate_op::scramble(parent, rng) };
         
@@ -84,11 +83,10 @@ TEST(ScrambleMutationTest, PerformsScrambleCorrectly)
 {
     std::vector<int> parent(16);
     std::ranges::iota(parent, 0);
+    ga::Random rng {};
 
-    for (std::uint32_t seed { 0 }; seed < 64; ++seed)
+    for (int i { 0 }; i < 64; ++i)
     {
-        auto rng { makeRandom(seed) };
-
         const auto child { ga::mutate_op::scramble(parent, rng) };
 
         ASSERT_EQ(parent.size(), child.size());
@@ -108,7 +106,7 @@ TEST(ScrambleMutationTest, WorksWithDifferentContainerTypes)
 
 TEST(ScrambleMutationTest, InvalidInputThrows)
 {
-    ga::Random rng { ga::Random::generateMtEngine() };
+    ga::Random rng {};
 
     std::vector<int> parent {};
     EXPECT_DEBUG_DEATH(

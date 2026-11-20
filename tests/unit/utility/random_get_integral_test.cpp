@@ -10,7 +10,7 @@
 class RandomGetIntTest : public testing::Test
 {
 protected:
-    ga::Random rng { ga::Random::generateMtEngine() };
+    ga::Random rng {};
 };
 
 TEST_F(RandomGetIntTest, GetIntegralTypes)

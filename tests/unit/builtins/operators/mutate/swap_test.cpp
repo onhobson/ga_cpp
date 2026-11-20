@@ -92,9 +92,15 @@ TEST(SwapMutationTest, InvalidInputThrows)
     ga::Random rng { ga::Random::generateMtEngine() };
 
     std::vector<int> parent {};
-    EXPECT_THROW(ga::mutate_op::swap(parent, rng), std::invalid_argument);
+    EXPECT_DEBUG_DEATH(
+        ga::mutate_op::swap(parent, rng),
+        "Swap mutation requires at least 2 elements in parent"
+    );
 
     parent.push_back(1);
-    EXPECT_THROW(ga::mutate_op::swap(parent, rng), std::invalid_argument);
+    EXPECT_DEBUG_DEATH(
+        ga::mutate_op::swap(parent, rng),
+        "Swap mutation requires at least 2 elements in parent"
+    );
 }
 

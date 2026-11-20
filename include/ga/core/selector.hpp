@@ -5,6 +5,7 @@
 
 #include "ga/core/chromosome.hpp"
 
+#include <concepts>
 #include <utility>
 
 
@@ -15,6 +16,10 @@ namespace ga::detail
  * @brief Handles tournament selection logic for selecting chromosomes from a population.
  */
 template <typename Sequence, typename Fitness, typename Compare>
+requires (
+    std::totally_ordered<Fitness> &&
+    std::strict_weak_order<Compare, Fitness, Fitness>
+)
 class Selector
 {
     using Chromosome = ga::Chromosome<Sequence, Fitness>;
@@ -58,7 +63,7 @@ public:
             // Randomly select subsequent items to override sample items
             for (std::size_t i { 0 }; i < population.size(); ++i)
             { 
-                if (i == chosen[0])
+                if (i == chosen[0]) // Skip index if chosen as first selection
                     continue;
 
                 if (seen < m_tournamentSize)

@@ -3,6 +3,7 @@
 
 #include "ga/core/chromosome.hpp"
 
+#include <cassert>
 #include <concepts>
 #include <functional>
 #include <algorithm>
@@ -16,10 +17,14 @@ namespace ga::detail
  * @brief A class that evaluates the fitness of a population of chromosomes using the given evaluation function.
  * 
  * @tparam Sequence The type of the sequences in the chromosomes.
- * @tparam Fitness The type returned by the evaluation function.
- * @tparam Compare A comparison function object that defines the ordering of fitness values.
+ * @tparam Fitness The type returned by the evaluation function. Must satisfy `std::totally_ordered<Fitness>`
+ * @tparam Compare A comparison function object that defines the ordering of fitness values. Must satisfy `std::strict_weak_order<Compare, Fitness, Fitness>`
  */
 template <typename Sequence, typename Fitness, typename Compare>
+requires (
+    std::totally_ordered<Fitness> &&
+    std::strict_weak_order<Compare, Fitness, Fitness>
+)
 class Evaluator
 {
 public:
@@ -40,12 +45,14 @@ public:
      */
     void evaluate(std::vector<Chromosome>& population)
     {
+        assert(population.size() >= m_eliteCount && "Population size must be greater than or equal to elite count");
+
         for (auto& chromosome : population)
         {
             chromosome.fitness = m_evaluate(chromosome.sequence);
         }
 
-        const auto eliteEnd = population.begin() + std::min(m_eliteCount, population.size());
+        const auto eliteEnd = population.begin() + m_eliteCount;
         std::ranges::partial_sort(population, eliteEnd, m_compare, &Chromosome::fitness);
     }
 

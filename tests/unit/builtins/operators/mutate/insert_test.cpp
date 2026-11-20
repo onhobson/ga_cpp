@@ -101,11 +101,17 @@ TEST(InsertMutationTest, InvalidInputThrows)
     ga::Random rng { ga::Random::generateMtEngine() };
 
     std::vector<int> parent {};
-    EXPECT_THROW(ga::mutate_op::insert(parent, rng), std::invalid_argument);
+    EXPECT_DEBUG_DEATH(
+        ga::mutate_op::insert(parent, rng),
+        "Insert mutation requires at least 3 elements in parent"
+    );
 
     for (int n : { 1, 2 })
     {
         parent.push_back(n);
-        EXPECT_THROW(ga::mutate_op::insert(parent, rng), std::invalid_argument);
+        EXPECT_DEBUG_DEATH(
+            ga::mutate_op::insert(parent, rng),
+            "Insert mutation requires at least 3 elements in parent"
+        );
     }
 }

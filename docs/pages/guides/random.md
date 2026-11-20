@@ -45,7 +45,3 @@ ga::Random rng { std::mt19937 { 123 } };
 auto engine = rng.getEngine();
 std::ranges::shuffle(sequence, engine);
 @endcode
-
-#### Using Custom Seeds
-
-The constructor accepts a `std::mt19937::result_type` seed value, or a `std::seed_seq` seed sequence if custom seeds are required. A supplied seed or seed sequence is used to initialize the underlying `std::mt19937` object.

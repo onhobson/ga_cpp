@@ -95,15 +95,43 @@ TEST(OrderCrossoverTest, SupportsFixedSizeRanges)
     expectPermutationOf(child, parent1);
 }
 
-TEST(OrderCrossoverTest, RejectsInvalidSequenceSizes)
+TEST(OrderCrossoverTest, ThrowsParentsDiffSize)
 {
-    auto rng { makeRandom(1) };
-    const std::vector<int> empty {};
-    const std::vector<int> oneGene { 1 };
-    const std::vector<int> twoGenes { 1, 2 };
-    const std::vector<int> threeGenes { 1, 2, 3 };
+    const std::vector<int> parent1 { 1, 2, 3, 4, 5 };
+    const std::vector<int> parent2 { 1, 2, 3, 4, 5, 6 };
+    auto rng { makeRandom(6) };
 
-    EXPECT_THROW(ga::crossover_op::order(empty, empty, rng), std::invalid_argument);
-    EXPECT_THROW(ga::crossover_op::order(oneGene, oneGene, rng), std::invalid_argument);
-    EXPECT_THROW(ga::crossover_op::order(twoGenes, threeGenes, rng), std::invalid_argument);
+    EXPECT_DEBUG_DEATH(
+        ga::crossover_op::order(parent1, parent2, rng),
+        "Parent sequences must match in size"
+    );
+}
+
+TEST(OrderCrossoverTest, ThrowsInvalidParentSize)
+{
+    std::vector<int> parent {};
+    auto rng { makeRandom(7) };
+
+    EXPECT_DEBUG_DEATH(
+        ga::crossover_op::order(parent, parent, rng),
+        "Parent size must be greater than or equal to 2"
+    );
+
+    parent.push_back(1);
+    EXPECT_DEBUG_DEATH(
+        ga::crossover_op::order(parent, parent, rng),
+        "Parent size must be greater than or equal to 2"
+    );
+}
+
+TEST(OrderCrossoverTest, ThrowsParentsAreNotPermutations)
+{
+    const std::vector<int> parent1 { 1, 0, 3, 4, 5, 6 };
+    const std::vector<int> parent2 { 1, 2, 3, 4, 5, 6 };
+    auto rng { makeRandom(8) };
+
+    EXPECT_DEBUG_DEATH(
+        ga::crossover_op::alternatingEdge(parent1, parent2, rng),
+        "Parents must be permutations"
+    );
 }

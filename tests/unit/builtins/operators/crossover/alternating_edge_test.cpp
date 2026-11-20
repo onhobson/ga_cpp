@@ -78,3 +78,38 @@ TEST(AlternatingEdgeTest, SupportsFixedSizeRanges)
 
     expectPermutationOf(child, parent1);
 }
+
+TEST(AlternatingEdgeTest, ThrowsParentsDiffSize)
+{
+    const std::vector<int> parent1 { 1, 2, 3, 4, 5 };
+    const std::vector<int> parent2 { 1, 2, 3, 4, 5, 6 };
+    auto rng { makeRandom(5) };
+
+    EXPECT_DEBUG_DEATH(
+        ga::crossover_op::alternatingEdge(parent1, parent2, rng),
+        "Parent sequences must match in size"
+    );
+}
+
+TEST(AlternatingEdgeTest, ThrowsParentSizeZero)
+{
+    const std::vector<int> parent {};
+    auto rng { makeRandom(6) };
+
+    EXPECT_DEBUG_DEATH(
+        ga::crossover_op::alternatingEdge(parent, parent, rng),
+        "Parent cannot be size 0"
+    );
+}
+
+TEST(AlternatingEdgeTest, ThrowsParentsAreNotPermutations)
+{
+    const std::vector<int> parent1 { 1, 2, 3, 4, 5, 7 };
+    const std::vector<int> parent2 { 1, 2, 3, 4, 5, 6 };
+    auto rng { makeRandom(6) };
+
+    EXPECT_DEBUG_DEATH(
+        ga::crossover_op::alternatingEdge(parent1, parent2, rng),
+        "Parents must be permutations"
+    );
+}

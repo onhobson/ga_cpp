@@ -4,8 +4,10 @@
 #include "ga/utility/constraints.hpp"
 #include "ga/utility/hash.hpp"
 #include "ga/utility/random.hpp"
+#include "ga/utility/debug_checks.hpp"
 
 #include <algorithm>
+#include <cassert>
 #include <ranges>
 #include <unordered_set>
 #include <vector>
@@ -21,7 +23,7 @@ namespace ga::mutate_op
      * @param rng The random number generator.
      * @return The mutated sequence.
      * 
-     * @throws `std::invalid_argument` If the size of the sequence is less than 3. Insertion mutation requires at least 3 elements to perform a valid operation.
+     * @pre `parent.size() >= 3`
      */
     template <typename Sequence>
     requires(constraints::Permutable<Sequence>)
@@ -29,8 +31,7 @@ namespace ga::mutate_op
     {
         const std::ptrdiff_t size { std::ranges::ssize(parent) };
         
-        if (size < 3)
-            throw std::invalid_argument("Invalid sequence size");
+        assert(size >= 3 && "Insert mutation requires at least 3 elements in parent");
 
         std::ptrdiff_t i1 { rng.get<std::ptrdiff_t>(0, size) };
         std::ptrdiff_t i2;
@@ -88,13 +89,15 @@ namespace ga::mutate_op
      * @param rng The random number generator.
      * @return The mutated sequence.
      * 
-     * @throws `std::invalid_argument` If the size of the sequence is less than 2. Inversion mutation requires at least 2 elements to perform a valid operation.
+     * @pre `parent.size() >= 2`
      */
     template <typename Sequence>
     requires(constraints::Permutable<Sequence>)
     Sequence inversion(const Sequence& parent, Random& rng)
     {
         const std::ptrdiff_t size { std::ranges::ssize(parent) };
+
+        assert(size >= 2 && "Inversion mutation requires at least 2 elements in parent");
         
         if (size < 2)
             throw std::invalid_argument("Invalid sequence size");
@@ -123,7 +126,7 @@ namespace ga::mutate_op
      * @param rng The random number generator.
      * @return The mutated sequence.
      * 
-     * @throws `std::invalid_argument` If the size of the sequence is less than 2. Scramble mutation requires at least 2 elements to perform a valid operation.
+     * @pre `parent.size() >= 2`
      */
     template <typename Sequence>
     requires(constraints::Permutable<Sequence> &&
@@ -132,8 +135,7 @@ namespace ga::mutate_op
     {
         const std::ptrdiff_t size { std::ranges::ssize(parent) };
 
-        if (size < 2)
-            throw std::invalid_argument("Invalid sequence size");
+        assert(size >= 2 && "Scramble mutation requires at least 2 elements in parent");
         
         // Select two random indexes
         auto i1 { rng.get<std::ptrdiff_t>(0, size) };
@@ -169,7 +171,7 @@ namespace ga::mutate_op
      * @param rng The random number generator.
      * @return The mutated sequence.
      * 
-     * @throws `std::invalid_argument` If the size of the sequence is less than 2. Swap mutation requires at least 2 elements to perform a valid operation.
+     * @pre `parent.size() >= 2`
      */
     template <typename Sequence>
     requires(constraints::Permutable<Sequence>)
@@ -177,8 +179,7 @@ namespace ga::mutate_op
     {
         const std::ptrdiff_t size { std::ranges::ssize(parent) };
 
-        if (size < 2)
-            throw std::invalid_argument("Invalid sequence size");
+        assert(size >= 2 && "Swap mutation requires at least 2 elements in parent");
             
         // Select two random indexes
         const auto i1 { rng.get<std::ptrdiff_t>(0, size) };

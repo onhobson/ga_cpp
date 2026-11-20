@@ -36,8 +36,6 @@ namespace ga
  * @tparam Sequence The type that is used by the given crossover and mutation operators.
  * @tparam Fitness The type that is returned by the given evaluation function. Must satisfy `std::totally_ordered<Fitness>`
  * @tparam Compare A comparison function object that defines the ordering of fitness values. Must satisfy `std::strict_weak_order<Compare, Fitness, Fitness>`. Defaults to `std::ranges::greater`.
- * @tparam URBG The type of the random number generator engine to use. Defaults to `std::mt19937`.
- *         Must satisfy the requirements of a uniform random bit generator.
  * 
  * @throws `std::invalid_argument` If the configuration parameters or operators are invalid.
  */
@@ -62,7 +60,6 @@ public:
      * @param evaluationFunction A function that takes a `Sequence` and returns its `Fitness` value.
      * @param operators A `ga::Operators` struct containing the crossover and mutation operators to use.
      * @param config A `ga::Config` object specifying the parameters of the genetic algorithm.
-     * @param randomEngine An optional random number generator engine to use. Defaults to a Mersenne Twister engine.
      */
     GeneticAlgorithm(
         std::function<Fitness(const Sequence&)> evaluationFunction,

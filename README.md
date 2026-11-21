@@ -1,6 +1,6 @@
 ﻿# Genetic Algorithm in C++
 
-A generic, header-only C++ library for building and configuring genetic algorithms. Provides a flexible framework for evolutionary optimization with customizable selection, crossover, mutation, initialization, and termination strategies.
+A generic, header-only C++ library for building and configuring genetic algorithms. Provides a flexible framework for evolutionary optimization with customizable crossover, mutation, and termination strategies.
 
 ## Features
 
@@ -29,7 +29,7 @@ Clone the repository:
 
 ```bash
 git clone https://github.com/onhobson/ga_cpp.git
-cd GeneticAlgorithm
+cd ga_cpp
 ```
 
 Configure and install the library:
@@ -47,15 +47,13 @@ After installation, configure your project with the installation prefix:
 cmake -S . -B build -DCMAKE_PREFIX_PATH="<installation-prefix>"
 ```
 
-In your project's CMakeLists.txt:
+In your project's CMakeLists.txt, use the package name `ga_cpp` and link the exported `ga::ga` target:
 
 ```cmake
-find_package(GeneticAlgorithm CONFIG REQUIRED)
+find_package(ga_cpp CONFIG REQUIRED)
 
 target_link_libraries(my_program PRIVATE ga::ga)
 ```
-
-The library's headers and C++23 requirements are provided automatically through the exported CMake target.
 
 ### CMake - `FetchContent()`
 
@@ -65,23 +63,22 @@ In your project's CMakeLists.txt:
 include(FetchContent)
 
 FetchContent_Declare(
-    GeneticAlgorithm
+    ga_cpp
     GIT_REPOSITORY https://github.com/onhobson/ga_cpp.git
     GIT_TAG v1.0.0
 )
 
-FetchContent_MakeAvailable(GeneticAlgorithm)
+FetchContent_MakeAvailable(ga_cpp)
 
 target_link_libraries(my_program PRIVATE ga::ga)
 ```
-
 
 
 ## Example
 
 ### A Traveling Salesman Problem Heuristic
 
-This example describes using the library to solve a traveling salesman problem (TSP). The raw code can be seen at [examples\att48\att48.cpp](examples\att48\att48.cpp)
+This example describes using the library to solve a traveling salesman problem (TSP). The raw code can be seen at [examples/att48/att48.cpp](examples/att48/att48.cpp)
 
 This example defines a `Sequence` as:
 ```cpp

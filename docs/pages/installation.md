@@ -15,13 +15,15 @@ cmake --install build
 
 Replace `<installation-prefix>` with the directory where you want the library installed.
 
-In the consuming project's `CMakeLists.txt`, locate the package and link the exported `ga::ga` target:
+In the consuming project's `CMakeLists.txt`, locate the `ga_cpp` package and link the exported `ga::ga` target.
 
 @code{.cmake}
-find_package(GeneticAlgorithm CONFIG REQUIRED)
+find_package(ga_cpp CONFIG REQUIRED)
 
 target_link_libraries(my_program PRIVATE ga::ga)
 @endcode
+
+The package name and target name serve different roles: `ga_cpp` identifies the CMake package, while `ga::ga` identifies the library target. The library's headers and C++23 requirements are provided automatically through the exported CMake target.
 
 When configuring the consuming project, point CMake at the installation prefix if it is not already in a standard package search location:
 
@@ -37,12 +39,12 @@ To fetch the library as part of your project configuration, declare it in the co
 include(FetchContent)
 
 FetchContent_Declare(
-    GeneticAlgorithm
+    ga_cpp
     GIT_REPOSITORY https://github.com/onhobson/ga_cpp.git
     GIT_TAG v1.0.0
 )
 
-FetchContent_MakeAvailable(GeneticAlgorithm)
+FetchContent_MakeAvailable(ga_cpp)
 
 target_link_libraries(my_program PRIVATE ga::ga)
 @endcode

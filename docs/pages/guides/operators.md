@@ -14,24 +14,71 @@ When the algorithm invokes a crossover or mutation step, the relevant selector o
 
 An operator set, under the namespace @ref ga::op_set, groups related crossover and mutation operators into a single reusable callable. These sets return a ready-to-use @ref ga::Operators object initialized with the built-in operators and equal weights.
 
+@code
+// Using op_set directly within GeneticAlgorithm constructor
+ga::GeneticAlgorithm<Sequence, Fitness> ga {
+    evalFunc,
+    ga::op_set::permutationOperations<Sequence>(),
+    config
+};
+@endcode
+
 #### Using Operators
 
-Operators are supplied to the genetic algorithm by passing a @ref ga::Operators instance to the @ref ga::GeneticAlgorithm constructor.
+Operators are supplied to the genetic algorithm by passing a @ref ga::Operators<Sequence> instance to the @ref ga::GeneticAlgorithm constructor.
 
 The @ref ga::Operators struct contains two members:
-- `crossover`, a @ref ga::Crossover
-- `mutate`, a @ref ga::Mutate
+- `crossover`, a @ref ga::Crossover<Sequence>
+- `mutate`, a @ref ga::Mutate<Sequence>
 
-Each member may be constructed in one of three ways:
+Each member may be constructed in one of three ways (examples show @ref ga::Crossover<Sequence>, but applies to @ref ga::Mutate<Sequence> as well):
 
-1. Single operator
-   - The provided operation is always selected whenever that step is invoked.
+1. Single operator   
+The provided operation is always selected whenever that step is invoked.
+@code
+ga::Crossover<Sequence> crossOps {
+    crossoverOperation
+};
+@endcode
 
-2. Vector of operators
-   - One operator is selected randomly with equal weights when the step is invoked.
+2. Vector of operators   
+One operator is selected randomly with equal weights when the step is invoked.
+@code
+ga::Crossover<Sequence> crossOps {
+    { crossoverOperation1, crossoverOperation2, ...}
+};
+@endcode
 
-3. Vector of operators with a vector of weights
-   - One operator is selected randomly according to the supplied weighted probabilities.
+3. Vector of operators with a vector of weights   
+One operator is selected randomly according to the supplied weighted probabilities.
+@code
+ga::Crossover<Sequence> crossOps {
+    { crossoverOperation1, crossoverOperation2, ...},
+    { 0.5, 1.0, ...}
+};
+@endcode
+
+A @ref ga::Operators<Sequence> object must then be instantiated with the @ref ga::Crossover<Sequence> and @ref ga::Mutate<Sequence> objects:
+
+@code
+ga::Operators<Sequence> operators {
+    crossOps,
+    mutateOps
+};
+@endcode
+
+Alternatively, @ref ga::Operators<Sequence> accepts temporary objects as well:
+
+@code
+ga::Operators<Sequence> operators {
+    ga::Crossover<Sequence> {
+        { crossoverOperation1, crossoverOperation2 }
+    },
+    ga::Mutate<Sequence> {
+        { mutateOperation1, mutateOperation2 }
+    }
+};
+@endcode
 
 ### Built-in Operators
 

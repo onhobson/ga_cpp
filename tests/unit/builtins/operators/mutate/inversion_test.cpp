@@ -6,7 +6,8 @@
 
 #include <gtest/gtest.h>
 
-#include <ranges>
+#include <algorithm>
+#include <numeric>
 #include <vector>
 
 

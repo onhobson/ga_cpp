@@ -6,9 +6,10 @@
 
 #include <gtest/gtest.h>
 
-#include <ranges>
-#include <vector>
+#include <algorithm>
 #include <limits>
+#include <numeric>
+#include <vector>
 
 namespace
 {

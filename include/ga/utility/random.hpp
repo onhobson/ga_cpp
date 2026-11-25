@@ -157,14 +157,10 @@ public:
         std::uniform_int_distribution<T> dist {0, validCount - 1};
         T val { min + dist(m_engine) };
 
-        // Add offset value to val
-        auto it { std::ranges::lower_bound(exclude, val) };
-        val + static_cast<T>(it - exclude.begin());
-
-        // Ensure offset + val is not in exclude
-        for (auto n : std::ranges::subrange(it, exclude.end()))
+        // Linear shift to map val to output range
+        for (auto n : exclude)
         {
-            if (val == n)
+            if (n <= val)
                 ++val;
             else
                 break;

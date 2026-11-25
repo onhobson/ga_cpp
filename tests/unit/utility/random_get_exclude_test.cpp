@@ -49,6 +49,61 @@ TEST_F(RandomGetExcludeTest, GetIntegralExcludeMultipleValues)
     }
 }
 
+TEST_F(RandomGetExcludeTest, GetIntegralExcludeSingleDistribution)
+{
+    constexpr std::size_t max { 10 };
+    constexpr std::size_t iter { 10'000 };
+
+    for (int exclude : {0, 3, 9})
+    {
+        SCOPED_TRACE("Exclude=" + std::to_string(exclude));
+        std::vector<int> counts(max, 0);
+
+        for (std::size_t i { 0 }; i < iter; ++i)
+        {
+            const int randVal { rng.get<int>(0, max, exclude) };
+            ++counts[randVal];
+        }
+
+        for (std::size_t i { 0 }; i < max; ++i)
+        {
+            if (static_cast<int>(i) == exclude)
+                EXPECT_EQ(counts[i], 0);
+            else
+            {
+                const int expected { static_cast<int>(iter) / (static_cast<int>(max) - 1) };
+                EXPECT_NEAR(counts[i], expected, expected * 0.15); // +/- 15% of expected
+            }
+        }
+    }
+}
+
+TEST_F(RandomGetExcludeTest, GetIntegralExcludeMultipleDistribution)
+{
+    constexpr std::size_t max { 100 };
+    constexpr std::size_t iter { 100'000 };
+
+    std::vector<int> counts(max, 0);
+    std::vector<int> exclude { 8, 22, 28, 42, 43, 44, 73, 89, 98 };
+
+    for (std::size_t i { 0 }; i < iter; ++i)
+    {
+        const int randVal { rng.get<int>(0, max, exclude) };
+        ++counts[randVal];
+    }
+
+    for (std::size_t i { 0 }; i < max; ++i)
+    {
+        if (std::ranges::find(exclude, static_cast<int>(i)) != exclude.end())
+            EXPECT_EQ(counts[i], 0);
+        else
+        {
+                const int expected { static_cast<int>(iter) / (static_cast<int>(max) - static_cast<int>(exclude.size())) };
+            EXPECT_NEAR(counts[i], expected, expected * 0.15); // +/- 15% of expected
+        }
+    }
+}
+
 TEST_F(RandomGetExcludeTest, GetIntegralExcludeSingleThrowsInvalidRange)
 {
     EXPECT_DEBUG_DEATH(

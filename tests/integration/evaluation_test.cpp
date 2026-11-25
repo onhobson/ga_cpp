@@ -33,7 +33,8 @@ namespace
         }
     };
 
-    std::array<int, 10> nMap {
+    std::array<int, 20> nMap {
+        -8, -6, -4, -2, 0, 2, 4, 6, 8, 10,
         -8, -6, -4, -2, 0, 2, 4, 6, 8, 10
     };
 

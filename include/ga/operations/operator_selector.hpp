@@ -73,10 +73,7 @@ protected:
         // Build WeightedOperator array by bundling operations and weights
         for (std::size_t i {0}; i < operations.size(); ++i)
         {
-            if (!std::isfinite(weights[i]))
-                throw std::invalid_argument("Given weight must be finite");
-            if (weights[i] < 0.0)
-                throw std::invalid_argument(std::format("Given weight, {}, cannot be negative", weights[i]));
+            validateWeight(weights[i]);
 
             cumWeight += weights[i];
 
@@ -122,6 +119,35 @@ protected:
         assert(it != m_weightedOperators.end() && "Random weight was not within given operator weight range");
 
         return it->op;
+    }
+
+public:
+    /// @brief Adds an operation with a given weight to the selector.
+    void addOperation(Operation operation, double weight = 1.0)
+    {
+        validateWeight(weight);
+
+        if (!m_weightedOperators.empty())
+            weight += m_weightedOperators.back().weight;
+
+        m_weightedOperators.emplace_back(
+            WeightedOperator { operation, weight }
+        );
+    }
+
+    /// @brief Clears all operations from the selector.
+    void clearOperations()
+    {
+        m_weightedOperators.clear();
+    }
+
+private:
+    void validateWeight(double weight)
+    {
+        if (!std::isfinite(weight))
+            throw std::invalid_argument("Given weight must be finite");
+        if (weight < 0.0)
+            throw std::invalid_argument(std::format("Given weight, {}, cannot be negative", weight));
     }
     
 };

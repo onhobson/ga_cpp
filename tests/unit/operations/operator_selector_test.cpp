@@ -177,3 +177,84 @@ TEST(OperatorSelectorTest, ThrowsForAllZeroWeights)
         std::invalid_argument
     );
 }
+
+TEST(OperatorSelectorTest, AddOperationRejectsInvalidWeights)
+{
+    TestOperatorSelector selector { { 1 }, { 1.0 } };
+
+    EXPECT_THROW(selector.addOperation(2, -1.0), std::invalid_argument);
+    EXPECT_THROW(selector.addOperation(2, NAN), std::invalid_argument);
+    EXPECT_THROW(selector.addOperation(2, INFINITY), std::invalid_argument);
+}
+
+TEST(OperatorSelectorTest, AddOperationWorksWhenNoOperationsArePresent)
+{
+    TestOperatorSelector selector {};
+    ga::Random rng {};
+
+    selector.addOperation(24, 2.5);
+
+    for (int i = 0; i < 100; ++i)
+        EXPECT_EQ(selector.select(rng), 24);
+}
+
+TEST(OperatorSelectorTest, AddOperationAccumulatesWeights)
+{
+    TestOperatorSelector selector {};
+    selector.addOperation(1, 1.0);
+    selector.addOperation(2, 3.0);
+    selector.addOperation(3, 2.0);
+    selector.addOperation(4, 4.0);
+
+    ga::Random rng {};
+    int operation1Count {};
+    int operation2Count {};
+    int operation3Count {};
+    int operation4Count {};
+    constexpr int sampleCount { 20000 };
+
+    for (int i = 0; i < sampleCount; ++i)
+    {
+        const int operation { selector.select(rng) };
+        if (operation == 1)
+            ++operation1Count;
+        else if (operation == 2)
+            ++operation2Count;
+        else if (operation == 3)
+            ++operation3Count;
+        else if (operation == 4)
+            ++operation4Count;
+        else
+            FAIL() << "Unexpected operation selected: " << operation;
+    }
+
+    EXPECT_NEAR(operation1Count, sampleCount * 0.10, sampleCount * 0.03);
+    EXPECT_NEAR(operation2Count, sampleCount * 0.30, sampleCount * 0.03);
+    EXPECT_NEAR(operation3Count, sampleCount * 0.20, sampleCount * 0.03);
+    EXPECT_NEAR(operation4Count, sampleCount * 0.40, sampleCount * 0.03);
+}
+
+TEST(OperatorSelectorTest, ClearOperationsRemovesExistingOperations)
+{
+    TestOperatorSelector selector { { 1, 2 }, { 1.0, 2.0 } };
+    ga::Random rng {};
+
+    selector.clearOperations();
+
+    EXPECT_DEBUG_DEATH(
+        selector.select(rng),
+        "Operations were not available for selection"
+    );
+}
+
+TEST(OperatorSelectorTest, ClearOperationsIsSafeWhenAlreadyEmpty)
+{
+    TestOperatorSelector selector {};
+
+    EXPECT_NO_THROW(selector.clearOperations());
+    EXPECT_NO_THROW(selector.clearOperations());
+
+    selector.addOperation(24, 1.0);
+    ga::Random rng {};
+    EXPECT_EQ(selector.select(rng), 24);
+}
